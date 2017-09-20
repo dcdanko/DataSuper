@@ -2,4 +2,6 @@
 
 __version__ = '0.1.0'
 __author__ = 'David C. Danko <dcdanko@gmail.com>'
-__all__ = []
+
+from .repo import *
+from datasuper import database

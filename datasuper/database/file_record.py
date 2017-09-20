@@ -1,8 +1,9 @@
+from .base_record import *
 
 class FileRecord( BaseRecord):
     
-    def __init__(self, **kwargs):
-        super(Result, self).__init__(**kwargs)
+    def __init__(self, repo, **kwargs):
+        super(Result, self).__init__(repo, **kwargs)
         self.filepath = kwargs['filepath']
         self.fileType = self.repo.validateFileType( kwargs['file_type'])        
         try:

@@ -1,7 +1,8 @@
-        
+from .base_record import *
+
 class SampleRecord( BaseRecord):
-    def __init__(self,**kwargs):
-        super(Sample, self).__init__(**kwargs)
+    def __init__(self, repo, **kwargs):
+        super(SampleRecord, self).__init__(repo, **kwargs)
         self._results = kwargs['results'] # n.b. these are keys not objects
         self.sampleType = self.repo.validateSampleType( kwargs['sample_type'])
         
@@ -20,7 +21,7 @@ class SampleRecord( BaseRecord):
         return True
 
     def results(self):
-        return self.db.resultTbl.getMany(self._results):
+        return self.db.resultTable.getMany(self._results)
             
     
     def __str__(self):

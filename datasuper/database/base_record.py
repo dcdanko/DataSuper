@@ -1,8 +1,9 @@
 
 class BaseRecord:
-    def __init__(self, db, **kwargs):
-        self.db = db
-        self.dbTable = db.getTable( type(self))
+    def __init__(self, repo, **kwargs):
+        self.repo = repo
+        self.db = repo.db
+        self.dbTable = self.db.getTable( type(self))
         self.name = kwargs['name']        
 
         try:
@@ -37,8 +38,7 @@ class BaseRecord:
             self.dbTable.update(rec, eids=[rec.eid])
             return self.dbTable.get(self.primaryKey)
         else:
-            self.dbTable.insert(self.to_dict())
-            return self.dbTable.get(self.primaryKey)
+            return self.dbTable.insert(self.to_dict())
 
     
     def delete(self):

@@ -1,7 +1,8 @@
+from .base_record import *
 
 class ResultRecord( BaseRecord):
-    def __init__(self, **kwargs):
-        super(ResultRecord, self).__init__(**kwargs)
+    def __init__(self, repo, **kwargs):
+        super(ResultRecord, self).__init__(repo, **kwargs)
         try:
             self._previousResults = kwargs['previous_results']
         except KeyError:
@@ -32,9 +33,9 @@ class ResultRecord( BaseRecord):
         if type(self._fileRecords) == dict:
             out = {}
             for k, fr in self._fileRecords:
-                out[k] = self.db.fileTbl.get(fr)
+                out[k] = self.db.fileTable.get(fr)
         else:
-            return self.db.fileTbl.getMany( self._fileRecords)
+            return self.db.fileTable.getMany( self._fileRecords)
     
     def validStatus(self):
         fs = self.files()
@@ -54,7 +55,7 @@ class ResultRecord( BaseRecord):
             if fileRecs is None:
                 return [None for _ in schema]
             else:
-                assert len(fileRecs) == len(schema):
+                assert len(fileRecs) == len(schema)
                 return fileRecs
         elif type(schema) == dict:
             if fileRecs is None:

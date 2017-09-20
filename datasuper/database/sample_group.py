@@ -1,11 +1,21 @@
+from .base_record import *
 
 class SampleGroupRecord( BaseRecord):
-    def __init__(self,**kwargs):
-        super(SampleGroup, self).__init__(**kwargs)
-        self._subgroups = kwargs['subgroups'] # n.b. these are keys not objects
-        self._directSamples = kwargs['direct_samples'] # n.b. these are keys not objects
-        self._directResults = kwargs['direct_results'] # n.b. these are keys not objects
-
+    def __init__(self, repo, **kwargs):
+        super(SampleGroupRecord, self).__init__(repo, **kwargs)
+        try:
+            self._subgroups = kwargs['subgroups'] # n.b. these are keys not objects
+        except KeyError:
+            self._subgroups = []
+        try:
+            self._directSamples = kwargs['direct_samples'] # n.b. these are keys not objects
+        except KeyError:
+            self._directSamples = []
+        try:
+            self._directResults = kwargs['direct_results'] # n.b. these are keys not objects
+        except KeyError:
+            self._directResults = []
+            
     def validStatus(self):
         for subgroup in self.subgroups():
             if subgroup.primaryKey == self.primaryKey:
@@ -34,7 +44,7 @@ class SampleGroupRecord( BaseRecord):
         return out
 
     def directSamples(self):
-        return self.db.sampleTbl.getMany( self._directSamples)
+        return self.db.sampleTable.getMany( self._directSamples)
         
     def allSamples(self):
         for sample in self.directSamples():
@@ -44,7 +54,7 @@ class SampleGroupRecord( BaseRecord):
                 yield sample
                 
     def directResults(self):
-        return self.db.resultTbl.getMany( self._directResults)
+        return self.db.resultTable.getMany( self._directResults)
 
     def allResults(self):
         for res in self.directResults():
@@ -57,7 +67,7 @@ class SampleGroupRecord( BaseRecord):
                 yield res
     
     def subgroups(self):
-        return self.dbTbl.getMany( self._subgroups)
+        return self.dbTable.getMany( self._subgroups)
     
     def __str__(self):
         out = '{}'.format(self.name)

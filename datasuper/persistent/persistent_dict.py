@@ -1,7 +1,7 @@
 import yaml
 import os
 
-class PersistentList:
+class PersistentDict:
 
     def __init__(self, path):
         self.path = path
@@ -12,7 +12,9 @@ class PersistentList:
             self.savedList = []
 
     def save(self):
-        pass
+        with open(self.path) as f:
+            f.write( yaml.dump( self.savedSet))
+        
             
     def __getitem__(self, key):
         return self.savedList[key]

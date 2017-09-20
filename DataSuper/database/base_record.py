@@ -1,66 +1,32 @@
-from tinydb import TinyDB, Query, where
-import meta_ultra.config as config
-from meta_ultra.data_type import DataType, DataTypeNotFoundError
-from meta_ultra.sample_type import SampleType, SampleTypeNotFoundError
-from meta_ultra.utils import *
-from os.path import basename
-import json
-
-projectTbl = config.db_project_table
-sampleTbl = config.db_sample_table
-dataTbl = config.db_data_table
-experimentTbl = config.db_experiment_table
-resultTbl = config.db_result_table
-confTbl = config.db_conf_table
-
-################################################################################
-#
-# Classes
-#
-################################################################################
-
-class RecordExistsError(Exception):
-    pass
-
-class NoSuchRecordError(Exception):
-    pass
-
-class InvalidRecordStateError(Exception):
-    pass
 
 class BaseRecord:
-    tblName = None
-    def __init__(self, **kwargs):
+    def __init__(self, db, **kwargs):
+        self.db = db
+        self.dbTable = db.getTable( type(self))
+        self.name = kwargs['name']        
+
         try:
             self.primaryKey = kwargs['primary_key']
         except KeyError:
-            self.primaryKey = self.generatePrimaryKey()
-        self.name = kwargs['name']
+            self.primaryKey = None
         try:
             self.metadata = kwargs['metadata']
         except KeyError:
             self.metadata = {}
-        
-    def record(self, repo=None):
-        rec = type(self).dbTbl(repo).get(where('name') == self.name)
-        if not rec:
-            raise NoSuchRecordError()
-        return rec
 
-    def saved(self, repo=None):
-        return type(self).exists(self.name, repo=repo)
-
-    def generatePrimaryKey(self):
-        raise NotImplementedError()
     
-    def save(self, modify=False, repo=None):
+    def exists(self):
+        return self.dbTable.exists(self.primaryKey)
+
+    def save(self, modify=False):
         if not self.validStatus():
             raise InvalidRecordStateError()
-        
-        if self.saved() and not modify:
+
+        alreadyExists = self.exists()
+        if alreadyExists and not modify:
             raise RecordExistsError()
-        elif self.saved() and modify:
-            rec = self.record()
+        elif alreadyExists and modify:
+            rec = self.dbTable.get(self.primaryKey).to_dict()
             mydict = self.to_dict()
             for k,v in mydict.items():
                 if k in rec and type(v) == dict and type(rec[k]) == dict:
@@ -68,16 +34,18 @@ class BaseRecord:
                         rec[k][subk] = subv
                 else:
                     rec[k] = v
-            type(self).dbTbl(repo).update(rec, eids=[rec.eid])
-            return type(self).get(self.name)
+            self.dbTable.update(rec, eids=[rec.eid])
+            return self.dbTable.get(self.primaryKey)
         else:
-            type(self).dbTbl(repo).insert(self.to_dict())
-            return type(self).get(self.name)
+            self.dbTable.insert(self.to_dict())
+            return self.dbTable.get(self.primaryKey)
 
     
-    def remove(self, repo=None):
-        record = self.record()
-        type(self).dbTbl(repo).remove(eids=[record.eid])
+    def delete(self):
+        self.dbTable.remove(self.primaryKey)
+
+    def raw(self):
+        return self.dbTable.getRaw( self.primaryKey)
 
     def validStatus(self):
         raise NotImplementedError()
@@ -90,48 +58,5 @@ class BaseRecord:
             }
         return out
     
-    
-    @classmethod
-    def build(ctype, *args, **kwargs):
-        return ctype(**kwargs)
-
-        
-    @classmethod
-    def get(ctype, primaryKey, repo=None):
-        rec = ctype.dbTbl(repo).get(where('primary_key') == primaryKey)
-        if not rec:
-            raise NoSuchRecordError()
-        return ctype.build(**rec)
-
-    @classmethod
-    def exists(ctype, name, repo=None):
-        return ctype.dbTbl(repo).get(where('name') == name) != None
-
-    @classmethod
-    def all(ctype, repo=None):
-        recs = ctype.dbTbl(repo).all()
-        recs = [ctype.build(**rec) for rec in recs]
-        return recs
-
-    @classmethod
-    def where(ctype, repo=None, **kwargs):
-        q = Query()
-        for k,v in kwargs.items():
-            q &= Query()[k] == v
-        recs = ctype.dbTbl(repo).search(q)
-        recs = [ctype.build(**rec) for rec in recs]
-        return recs
-
-    @classmethod
-    def search(ctype, query, repo=None):
-        recs = ctype.dbTbl(repo).search(query)
-        recs = [ctype.build(**rec) for rec in recs]
-        return recs
-
-    @classmethod
-    def dbTbl(ctype, repo):
-        if repo != None:
-            return repo.table( ctype.tableName())
-        return Repo.getRepo(caching=False).table( ctype.tableName())
 
     

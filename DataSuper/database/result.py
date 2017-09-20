@@ -1,33 +1,76 @@
-import meta_ultra.config as config
 
-class Result( BaseRecord):
+class ResultRecord( BaseRecord):
     def __init__(self, **kwargs):
-        super(Result, self).__init__(**kwargs)
-        self._previousResults = kwargs['previous_results']
-        self._fileRecords = kwargs['file_records']
-        self.resultType = ResultType( kwargs['result_type'])
+        super(ResultRecord, self).__init__(**kwargs)
+        try:
+            self._previousResults = kwargs['previous_results']
+        except KeyError:
+            self._previousResults = []
+        try:
+            self._provenance = kwargs['provenance']
+        except KeyError: 
+            self._provenance = []           
+        self.resultType = self.repo.validateResultType( kwargs['result_type'])
 
+        try:
+            fileRecs = kwargs['file_records']
+        except KeyError:
+            fileRecs = None
+        # this will return a list of primary keys or a
+        # map of identifiers -> primary keys (as a dict)
+        self._fileRecords = self.instantiateResultSchema( fileRecs)
+        
     def to_dict(self):
         out = super(Sample, self).to_dict()
         out['previous_results'] = self._previousResults
+        out['provenance'] = self._provenance
         out['file_records'] = self._fileRecords
-        out['result_type'] = str( self.resultType)
+        out['result_type'] = self.resultType
         return out
 
     def files(self):
-        raise NotImplementedError()
+        if type(self._fileRecords) == dict:
+            out = {}
+            for k, fr in self._fileRecords:
+                out[k] = self.db.fileTbl.get(fr)
+        else:
+            return self.db.fileTbl.getMany( self._fileRecords)
     
     def validStatus(self):
-        raise NotImplementedError()        
+        fs = self.files()
+        if type(fs) == dict:
+            fs = fs.values()
+        for fileRec in fs:
+            if not fileRec.validStatus():
+                return False
+
+        # TODO: check that it matches schema
+        return True
+            
+
+    def instantiateResultSchema(self, fileRecs):
+        schema = self.repo.getResultSchema[self.resultType]
+        if type(schema) == list:
+            if fileRecs is None:
+                return [None for _ in schema]
+            else:
+                assert len(fileRecs) == len(schema):
+                return fileRecs
+        elif type(schema) == dict:
+            if fileRecs is None:
+                return {k:None for k in schema.keys()}
+            else:
+                for k,v in fileRecs.items():
+                    assert k in schema
+                return fileRecs
+        else:
+            assert type(fileRecs) == str
+            return fileRecs
+
 
     
     def __str__(self):
-        out = '{}\t{}'.format(self.name,
-                              self.moduleName,
-                              self.resultType)
+        out = '{}\t{}'.format(self.name, self.resultType)
         return out
 
-    @classmethod
-    def tableName(ctype):
-        return config.result_table_name
 

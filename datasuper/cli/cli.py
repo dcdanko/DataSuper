@@ -21,7 +21,8 @@ def add():
 
 @add.command(name='group')
 @click.argument('name', nargs=1)
-def addGroup( name):
+@click.argument('samples', nargs=-1)
+def addGroup( name, samples):
     with Repo.loadRepo() as repo:
         sg = SampleGroupRecord(repo, name=name)
         sg.save()
@@ -31,7 +32,7 @@ def addGroup( name):
 @click.argument('sample_type', default=None, nargs=1)
 def addSample( name, sample_type):
     with Repo.loadRepo() as repo:
-        sample = SampleRecord(repo, name=name, sampleType=sample_type)
+        sample = SampleRecord(repo, name=name, sample_type=sample_type)
         sample.save()
 
 @add.group()

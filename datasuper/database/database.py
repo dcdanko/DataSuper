@@ -37,6 +37,15 @@ class Database:
                                              SampleGroupRecord,
                                              self.tdb.table( Database.sampleGroupTblName))
         
+
+    def asPKs(self, names):
+        # convert a list of names into a list of pks
+        pass
+
+    def asNames(self, pks):
+        # convert a list of pks into a list of names
+        pass
+        
     def getTable(self, recType):
         if recType == FileRecord:
             return self.fileTable

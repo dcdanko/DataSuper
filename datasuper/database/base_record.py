@@ -4,8 +4,7 @@ class BaseRecord:
         self.repo = repo
         self.db = repo.db
         self.dbTable = self.db.getTable( type(self))
-        self.name = kwargs['name']        
-
+        self.name = kwargs['name']
         try:
             self.primaryKey = kwargs['primary_key']
         except KeyError:
@@ -15,7 +14,6 @@ class BaseRecord:
         except KeyError:
             self.metadata = {}
 
-    
     def exists(self):
         return self.dbTable.exists(self.primaryKey)
 
@@ -40,7 +38,10 @@ class BaseRecord:
         else:
             return self.dbTable.insert(self.to_dict())
 
-    
+
+    def rename(self, newName):
+        self.dbTable.rename( self.primaryKey, newName)
+        
     def delete(self):
         self.dbTable.remove(self.primaryKey)
 

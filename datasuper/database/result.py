@@ -4,7 +4,7 @@ class ResultRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
         super(ResultRecord, self).__init__(repo, **kwargs)
         try:
-            self._previousResults = kwargs['previous_results']
+            self._previousResults = self.db.asPKs(kwargs['previous_results'])
         except KeyError:
             self._previousResults = []
         try:
@@ -12,9 +12,8 @@ class ResultRecord( BaseRecord):
         except KeyError: 
             self._provenance = []           
         self.resultType = self.repo.validateResultType( kwargs['result_type'])
-        self._sample = kwargs['sample'] # primary key not object
         try:
-            fileRecs = kwargs['file_records']
+            fileRecs = self.db.asPKs(kwargs['file_records'])
         except KeyError:
             fileRecs = None
         # this will return a list of primary keys or a
@@ -48,8 +47,6 @@ class ResultRecord( BaseRecord):
         # TODO: check that it matches schema
         return True
 
-    def sample(self):
-        return self.db.sampleTable.get( self._sample)
 
     def instantiateResultSchema(self, fileRecs):
         schema = self.repo.getResultSchema[self.resultType]

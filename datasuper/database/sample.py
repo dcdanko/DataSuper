@@ -3,7 +3,7 @@ from .base_record import *
 class SampleRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleRecord, self).__init__(repo, **kwargs)
-        self._results = kwargs['results'] # n.b. these are keys not objects
+        self._results = se;lf.db.asPKs(kwargs['results']) # n.b. these are keys not objects
         self.sampleType = self.repo.validateSampleType( kwargs['sample_type'])
         
     def to_dict(self):

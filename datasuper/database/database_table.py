@@ -20,11 +20,14 @@ class DatabaseTable:
         pk = [rchoice(chars) for _ in range(N)]
         pk = ''.join(pk)
         return pk
+
+    def rename(self, primaryKey, newName):
+        pass
     
     def exists(self, primaryKey):
         return self.tbl.get(where('primary_key') == primaryKey) != None
 
-    def getRaw(self, priamryKey):
+    def getRaw(self, primaryKey):
         return self.tbl.get(where('primary_key') == primaryKey) 
     
     def get(self, primaryKey):

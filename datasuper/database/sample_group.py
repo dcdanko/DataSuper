@@ -4,15 +4,15 @@ class SampleGroupRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleGroupRecord, self).__init__(repo, **kwargs)
         try:
-            self._subgroups = kwargs['subgroups'] # n.b. these are keys not objects
+            self._subgroups = self.db.asPKs(kwargs['subgroups']) # n.b. these are keys not objects
         except KeyError:
             self._subgroups = []
         try:
-            self._directSamples = kwargs['direct_samples'] # n.b. these are keys not objects
+            self._directSamples = self.db.asPKs(kwargs['direct_samples']) # n.b. these are keys not objects
         except KeyError:
             self._directSamples = []
         try:
-            self._directResults = kwargs['direct_results'] # n.b. these are keys not objects
+            self._directResults = self.db.asPKs(kwargs['direct_results']) # n.b. these are keys not objects
         except KeyError:
             self._directResults = []
             

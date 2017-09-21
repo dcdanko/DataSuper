@@ -32,3 +32,6 @@ class PersistentSet:
 
     def __contains__(self, key):
         return key in self.savedSet
+
+    def __iter__(self):
+        return iter(self.savedSet)

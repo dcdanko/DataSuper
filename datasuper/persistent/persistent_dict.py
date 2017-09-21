@@ -7,32 +7,35 @@ class PersistentDict:
         self.path = path
         if os.path.exists(path):
             with open(self.path) as ymlfile:
-                self.savedList = yaml.load(ymlfile)
+                self.savedDict = yaml.load(ymlfile)
         else:
-            self.savedList = []
+            self.savedDict = {}
 
     def save(self):
         with open(self.path) as f:
-            f.write( yaml.dump( self.savedSet))
+            f.write( yaml.dump( self.savedDict))
         
             
     def __getitem__(self, key):
-        return self.savedList[key]
+        return self.savedDict[key]
 
     def __len__(self):
-        return len(self.savedList)
+        return len(self.savedDict)
 
     def __setitem__(self, key, val):
-        self.savedList[key] = val
+        self.savedDict[key] = val
         self.save()
         
     def append(self, val):
-        self.savedList.append(val)
+        self.savedDict.append(val)
         self.save()
 
     def __delitem__(self, key):
-        del self.savedList[key]
+        del self.savedDict[key]
         self.save()
 
     def __contains__(self, key):
-        return key in self.savedList
+        return key in self.savedDict
+
+    def keys():
+        return self.savedDic.keys()

@@ -10,6 +10,7 @@ class DatabaseTable:
 
     def __init__(self, repo, readOnly, typeStored, tinydbTbl):
         self.repo = repo
+        self.db = repo.db
         self.readOnly = readOnly
         self.tbl = tinydbTbl
         self.typeStored = typeStored
@@ -22,7 +23,19 @@ class DatabaseTable:
         return pk
 
     def rename(self, primaryKey, newName):
-        pass
+        if self.readOnly:
+            raise RepoReadOnlyError()
+        rawRec = self.getRaw( primaryKey)
+        oldName = rawRec.name
+        rawRec.name = newName
+        self.tbl.update( rawRec, eids=[rawRec.eid])
+
+        del self.db.nameToPKTable[oldName]
+        self.db.nameToPKTable[newName] = primaryKey
+        self.db.pkToNameTable[newName] = newName
+        
+        return self.get(primaryKey)
+
     
     def exists(self, primaryKey):
         return self.tbl.get(where('primary_key') == primaryKey) != None
@@ -50,9 +63,11 @@ class DatabaseTable:
     
     def insert(self, newRecord):
         if self.readOnly:
-            raise RepoReadOnlyError
+            raise RepoReadOnlyError()
         assert newRecord['primary_key'] is None # idiot check myself
         newRecord['primary_key'] = self._newPrimaryKey()
+        assert self.db.pkNotUsed(newRecord['primary_key'])
+        assert self.db.nameNotUsed(newRecord['name'])
         self.tbl.insert( newRecord)
         return self.get(newRecord['primary_key'])
         
@@ -60,6 +75,7 @@ class DatabaseTable:
         if self.readOnly:
             raise RepoReadOnlyError
         rawRec = self.getRaw( primaryKey)
+        assert rawRec.name == updatedRecord['name']
         self.tbl.update( updatedRecord, eids=[rawRec.eid])
         return self.get(primaryKey)
     

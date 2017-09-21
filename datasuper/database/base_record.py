@@ -41,6 +41,7 @@ class BaseRecord:
 
     def rename(self, newName):
         self.dbTable.rename( self.primaryKey, newName)
+        self.name = newName
         
     def delete(self):
         self.dbTable.remove(self.primaryKey)

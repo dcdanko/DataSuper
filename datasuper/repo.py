@@ -8,6 +8,9 @@ class NoRepoFoundError( Exception):
 class RepoAlreadyExistsError( Exception):
     pass
 
+class TypeNotFoundError( Exception):
+    pass
+
 class Repo:
     repoDirName = '.datasuper'
     dbRoot = 'datasuper.tinydb.json'
@@ -34,34 +37,48 @@ class Repo:
 
     def close(self):
         self.db.close()
+
+    def _notReadOnly(self):
+        if self.readOnly:
+            raise RepoReadOnlyError()
+        return True
         
     def addSampleType( self, sampleType):
-        pass
+        if self._notReadOnly():
+            self.sampleTypes.add(sampleType)
 
     def getSampleTypes( self):
-        pass
+        return [el for el in self.sampleTypes]
 
     def addFileType( self, fileType):
-        pass
+        if self._notReadOnly():
+            self.fileTypes.add( fileType)
 
+    def getFileTypes(self):
+        return [el for el in self.fileTypes]
+    
     def addResultSchema( self, resultType, resultSchema):
-        pass
+        if self._notReadOnly():
+            self.resultSchema[resultType] = resultSchema
+
+    def getResultTypes(self):
+        return [el for el in self.resultSchema.keys()]        
         
         
     def validateSampleType(self, sampleType):
         if sampleType in self.sampleTypes:
             return sampleType
-        # throw error
+        raise TypeNotFoundError()
 
     def validateResultType(self, resType):
         if resType in self.resultSchema:
             return resType
-        # throw error
+        raise TypeNotFoundError()
         
     def validateFileType(self, fileType):
         if fileType in self.fileTypes:
             return fileType
-        # throw error        
+        raise TypeNotFoundError()
         
     def getResultSchema(self, resType):
         schema = self.resultSchema[resType]

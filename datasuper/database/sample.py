@@ -1,13 +1,17 @@
 from .base_record import *
+from pyarchy import archy
 
 class SampleRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleRecord, self).__init__(repo, **kwargs)
-        self._results = se;lf.db.asPKs(kwargs['results']) # n.b. these are keys not objects
+        try:
+            self._results = self.db.asPKs(kwargs['results']) # n.b. these are keys not objects
+        except KeyError:
+            self._results = []
         self.sampleType = self.repo.validateSampleType( kwargs['sample_type'])
         
     def to_dict(self):
-        out = super(Sample, self).to_dict()
+        out = super(SampleRecord,  self).to_dict()
         out['results'] = self._results
         out['sample_type'] = str(self.sampleType)
         return out
@@ -25,11 +29,15 @@ class SampleRecord( BaseRecord):
             
     
     def __str__(self):
-        out = '{}\t{}'.format(self.name, self.projectName)
-        for k, v in self.metadata.items():
-            if ' ' in str(v):
-                out += '\t{}="{}"'.format(k,v)
-            else:
-                out += '\t{}={}'.format(k,v)
+        out = '{}\t{}'.format(self.name, self.sampleType)
         return out
+
+    def tree(self, raw=False):
+        out = {'label': self.name, 'nodes':[]}
+        for res in self.results():
+            out['nodes'].append( res.tree(raw=True))
+        if raw:
+            return out
+        else:
+            return archy(out)
 

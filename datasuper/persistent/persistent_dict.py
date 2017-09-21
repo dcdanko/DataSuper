@@ -12,7 +12,7 @@ class PersistentDict:
             self.savedDict = {}
 
     def save(self):
-        with open(self.path) as f:
+        with open(self.path, 'w') as f:
             f.write( yaml.dump( self.savedDict))
         
             

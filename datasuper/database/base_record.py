@@ -1,3 +1,4 @@
+from .database_exceptions import *
 
 class BaseRecord:
     def __init__(self, repo, **kwargs):
@@ -33,7 +34,7 @@ class BaseRecord:
                         rec[k][subk] = subv
                 else:
                     rec[k] = v
-            self.dbTable.update(rec, eids=[rec.eid])
+            self.dbTable.update(self.primaryKey, rec)
             return self.dbTable.get(self.primaryKey)
         else:
             return self.dbTable.insert(self.to_dict())
@@ -60,5 +61,4 @@ class BaseRecord:
             }
         return out
     
-
-    
+        

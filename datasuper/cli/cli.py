@@ -35,6 +35,17 @@ def addSample( name, sample_type):
         sample = SampleRecord(repo, name=name, sample_type=sample_type)
         sample.save()
 
+@add.command(name='samples-to-group')
+@click.argument('group_name', nargs=1)
+@click.argument('sample_names', nargs=-1)
+def addSamplesToGroup(group_name, sample_names):
+    with Repo.loadRepo() as repo:
+        group = repo.db.sampleGroupTable.get(group_name)
+        for sampleName in sample_names:
+            group.addSample(sampleName)
+        group.save(modify=True)
+
+        
 @add.group()
 def type():
     pass
@@ -45,6 +56,8 @@ def addSampleType(type_name):
     with Repo.loadRepo() as repo:
         repo.addSampleType(type_name)
 
+        
+        
 ################################################################################
 
 @main.group()
@@ -69,7 +82,18 @@ def viewSampleTypes():
     for st in repo.getSampleTypes():
         print(st)
 
+################################################################################
 
+@main.group()
+def tree():
+    pass
+
+@tree.command(name='groups')
+def treeGroups():
+    repo = Repo.loadRepo()
+    for sg in repo.db.sampleGroupTable.getAll():
+        sys.stdout.write(sg.tree())
+    
         
     
 ################################################################################

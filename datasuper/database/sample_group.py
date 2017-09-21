@@ -1,4 +1,5 @@
 from .base_record import *
+from pyarchy import archy
 
 class SampleGroupRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
@@ -7,10 +8,12 @@ class SampleGroupRecord( BaseRecord):
             self._subgroups = self.db.asPKs(kwargs['subgroups']) # n.b. these are keys not objects
         except KeyError:
             self._subgroups = []
+
         try:
             self._directSamples = self.db.asPKs(kwargs['direct_samples']) # n.b. these are keys not objects
         except KeyError:
             self._directSamples = []
+
         try:
             self._directResults = self.db.asPKs(kwargs['direct_results']) # n.b. these are keys not objects
         except KeyError:
@@ -43,6 +46,12 @@ class SampleGroupRecord( BaseRecord):
         out['direct_results'] = self._directResults
         return out
 
+    def addSample(self, sample):
+        if issubclass( type(sample), BaseRecord):
+            sample = sample.primaryKey
+        sample = self.db.asPK(sample)
+        self._directSamples.append(sample)
+    
     def directSamples(self):
         return self.db.sampleTable.getMany( self._directSamples)
         
@@ -79,4 +88,26 @@ class SampleGroupRecord( BaseRecord):
         return out
 
     
-    
+    def tree(self, raw=False):
+        out = {'label' : self.name, 'nodes': []}
+        resOut = {'label': 'direct_results', 'nodes': []}
+        for res in self.directResults():
+            resOut['nodes'].append( res.tree(raw=True))
+        if len(resOut['nodes']) > 0:
+            out['nodes'].append(resOut)
+
+        sOut = {'label': 'direct_samples', 'nodes': []}
+        for sample in self.directSamples():
+            sOut['nodes'].append( sample.tree(raw=True))
+        if len(sOut['nodes']) > 0:
+            out['nodes'].append(sOut)
+
+        gOut = {'label': 'subgroups', 'nodes': []}
+        for subgroup in self.subgroups():
+            gOut['nodes'].append( subgroup.tree(raw=True))
+        if len(gOut['nodes']) > 0:
+            out['nodes'].append(gOut)
+        if raw:
+            return out
+        return archy(out)
+        

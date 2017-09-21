@@ -19,76 +19,98 @@ class Database:
         self.repo = repo
         self.readOnly = readOnly
         self.tdb = tinydbDB
-        self.pkToNameTable = {}
-        self.nameToPKTable = {}        
-        self.fileTable = DatabaseTable( self.repo,
+        self.pkToNameTable = None
+        self.nameToPKTable = None      
+        self.fileTable = DatabaseTable( self,
                                         self.readOnly,
                                       FileRecord,
                                       self.tdb.table( Database.fileTblName))
-        for rec in self.fileTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
             
-        self.resultTable = DatabaseTable( self.repo,
+        self.resultTable = DatabaseTable( self,
                                         self.readOnly,                                          
                                         ResultRecord,
                                         self.tdb.table( Database.resultTblName))
+
+        self.sampleTable = DatabaseTable( self,
+                                        self.readOnly,                                          
+                                        SampleRecord,
+                                        self.tdb.table( Database.sampleTblName))
+        
+        self.sampleGroupTable = DatabaseTable( self,
+                                        self.readOnly,                                               
+                                             SampleGroupRecord,
+                                             self.tdb.table( Database.sampleGroupTblName))
+            
+    def _buildPKNameTables(self):
+        if self.pkToNameTable is not None:
+            return 
+        self.pkToNameTable = {}
+        self.nameToPKTable = {}      
+
+        for rec in self.fileTable.getAll():
+            self.pkToNameTable[rec.primaryKey] = rec.name
+            self.nameToPKTable[rec.name] = rec.primaryKey
+
         for rec in self.resultTable.getAll():
             self.pkToNameTable[rec.primaryKey] = rec.name
             self.nameToPKTable[rec.name] = rec.primaryKey
 
-        self.sampleTable = DatabaseTable( self.repo,
-                                        self.readOnly,                                          
-                                        SampleRecord,
-                                        self.tdb.table( Database.sampleTblName))
         for rec in self.sampleTable.getAll():
             self.pkToNameTable[rec.primaryKey] = rec.name
             self.nameToPKTable[rec.name] = rec.primaryKey
-        
-        self.sampleGroupTable = DatabaseTable( self.repo,
-                                        self.readOnly,                                               
-                                             SampleGroupRecord,
-                                             self.tdb.table( Database.sampleGroupTblName))
+
         for rec in self.sampleGroupTable.getAll():
             self.pkToNameTable[rec.primaryKey] = rec.name
             self.nameToPKTable[rec.name] = rec.primaryKey
-            
+
+
         
     def pkNotUsed(self, primaryKey):
         # check that the primary key has not already been used
+        self._buildPKNameTables()
         return not (primaryKey in self.pkToNameTable)
 
     def nameNotUsed(self, name):
         # check that the primary key has not already been used
+        self._buildPKNameTables()        
         return not (name in self.nameToPKTable)
+
+    def asPK(self, name):
+        self._buildPKNameTables()                
+        try:
+            pk = self.nameToPKTable[name]
+        except KeyError as ke:
+            if name in self.pkToNameTable:
+                pk = name
+            else:
+                raise ke
+        return pk
     
     def asPKs(self, names):
         # convert a list of names into a list of pks
+        self._buildPKNameTables()        
         pks = []
         for name in names:
-            try:
-                pk = self.nameToPKTable[name]
-            except KeyError as ke:
-                if pk in self.pkToNameTable:
-                    pk = name
-                else:
-                    raise ke
-            pks.append(pk)
+            pks.append( self.asPK(name))
         return pks
 
-
+    def asName(self, pks):
+        self._buildPKNameTables()                
+        try:
+            name = self.pkToNameTable[pk]
+        except KeyError as ke:
+            if pk in self.nameToPKTable:
+                name = pk
+            else:
+                raise ke
+        return name
+    
     def asNames(self, pks):
         # convert a list of pks into a list of names
+        self._buildPKNameTables()        
         names = []
         for pk in pks:
-            try:
-                name = self.pkToNameTable[pk]
-            except KeyError as ke:
-                if pk in self.nameToPKTable:
-                    name = pk
-                else:
-                    raise ke
-            names.append(name)
+            names.append( self.asName(name))
         return names
         
     def getTable(self, recType):

@@ -13,8 +13,8 @@ class PersistentSet:
                     self.savedSet.add(el)
                     
     def save(self):
-        with open(self.path) as f:
-            f.write( yaml.dump( self.savedSet))
+        with open(self.path, 'w') as f:
+            f.write( yaml.dump( [el for el in self.savedSet]))
             
     def __len__(self):
         return len(self.savedSet)

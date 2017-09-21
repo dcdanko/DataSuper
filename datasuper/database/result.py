@@ -1,4 +1,5 @@
 from .base_record import *
+from pyarchy import archy
 
 class ResultRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
@@ -73,4 +74,12 @@ class ResultRecord( BaseRecord):
         out = '{}\t{}'.format(self.name, self.resultType)
         return out
 
+    def tree(self, raw=False):
+        out = {'label': self.name, 'nodes':[]}
+        for fr in self.files():
+            out['nodes'].append( fr.filepath)
+        if raw:
+            return out
+        else:
+            return archy(out)
 

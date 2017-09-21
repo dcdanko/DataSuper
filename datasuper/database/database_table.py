@@ -8,10 +8,9 @@ class RepoReadOnlyError( Exception):
 
 class DatabaseTable:
 
-    def __init__(self, repo, readOnly, typeStored, tinydbTbl):
-        self.repo = repo
-        self.db = repo.db
-        self.readOnly = readOnly
+    def __init__(self, db, readOnly, typeStored, tinydbTbl):
+        self.repo = db.repo
+        self.db = db
         self.tbl = tinydbTbl
         self.typeStored = typeStored
 
@@ -38,22 +37,31 @@ class DatabaseTable:
 
     
     def exists(self, primaryKey):
+        primaryKey = self.db.asPK( primaryKey)
         return self.tbl.get(where('primary_key') == primaryKey) != None
 
     def getRaw(self, primaryKey):
+        primaryKey = self.db.asPK( primaryKey)        
         return self.tbl.get(where('primary_key') == primaryKey) 
     
     def get(self, primaryKey):
+        primaryKey = self.db.asPK( primaryKey)        
         rawRec = self.tbl.get(where('primary_key') == primaryKey)
         rec = self.typeStored( self.repo, **rawRec)
         return rec
         
     def getMany(self, primaryKeys):
+        primaryKeys = self.db.asPKs( primaryKeys)
+        '''
+        print(primaryKeys)
         Q = Query()
-        rawRecs = self.tbl.get(Q.primary_key.any(primaryKeys))
+        rawRecs = self.tbl.search(where('primary_key').all(primaryKeys))
+        print(rawRecs)
         if rawRecs is None:
             return []
         recs = [self.typeStored( self.repo, **rawRec) for rawRec in rawRecs]
+        '''
+        recs = [self.get(pk) for pk in primaryKeys]
         return recs
     
     def getAll(self):
@@ -62,7 +70,7 @@ class DatabaseTable:
         return recs
     
     def insert(self, newRecord):
-        if self.readOnly:
+        if self.repo.readOnly:
             raise RepoReadOnlyError()
         assert newRecord['primary_key'] is None # idiot check myself
         newRecord['primary_key'] = self._newPrimaryKey()
@@ -72,15 +80,17 @@ class DatabaseTable:
         return self.get(newRecord['primary_key'])
         
     def update(self, primaryKey, updatedRecord):
-        if self.readOnly:
+        primaryKey = self.db.asPK( primaryKey)
+        if self.repo.readOnly:
             raise RepoReadOnlyError
         rawRec = self.getRaw( primaryKey)
-        assert rawRec.name == updatedRecord['name']
+        assert rawRec['name'] == updatedRecord['name']
         self.tbl.update( updatedRecord, eids=[rawRec.eid])
         return self.get(primaryKey)
     
     def remove(self, primaryKey):
-        if self.readOnly:
+        primaryKey = self.db.asPK( primaryKey)
+        if self.repo.readOnly:
             raise RepoReadOnlyError            
         rawRecs = self.getRaw( primaryKey)
         self.tbl.remove(eids=[rawRec.eid])

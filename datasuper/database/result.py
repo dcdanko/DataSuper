@@ -12,7 +12,7 @@ class ResultRecord( BaseRecord):
         except KeyError: 
             self._provenance = []           
         self.resultType = self.repo.validateResultType( kwargs['result_type'])
-
+        self._sample = kwargs['sample'] # primary key not object
         try:
             fileRecs = kwargs['file_records']
         except KeyError:
@@ -22,7 +22,7 @@ class ResultRecord( BaseRecord):
         self._fileRecords = self.instantiateResultSchema( fileRecs)
         
     def to_dict(self):
-        out = super(Sample, self).to_dict()
+        out = super(ResultRecord, self).to_dict()
         out['previous_results'] = self._previousResults
         out['provenance'] = self._provenance
         out['file_records'] = self._fileRecords
@@ -47,7 +47,9 @@ class ResultRecord( BaseRecord):
 
         # TODO: check that it matches schema
         return True
-            
+
+    def sample(self):
+        return self.db.sampleTable.get( self._sample)
 
     def instantiateResultSchema(self, fileRecs):
         schema = self.repo.getResultSchema[self.resultType]

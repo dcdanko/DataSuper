@@ -1,4 +1,7 @@
 from .base_record import *
+from .sample import *
+from .result import *
+from .file_record import *
 from pyarchy import archy
 
 class SampleGroupRecord( BaseRecord):
@@ -51,7 +54,14 @@ class SampleGroupRecord( BaseRecord):
             sample = sample.primaryKey
         sample = self.db.asPK(sample)
         self._directSamples.append(sample)
-    
+
+    def addResult(self, result):
+        if issubclass( type(result), BaseRecord):
+            result = result.primaryKey
+        result = self.db.asPK( result)
+        self._directResults.append( result)
+
+        
     def directSamples(self):
         return self.db.sampleTable.getMany( self._directSamples)
         

@@ -82,10 +82,20 @@ class Repo:
         
     def getResultSchema(self, resType):
         schema = self.resultSchema[resType]
+        return schema
         
     def pathFromRepo(self, abspath):
         # get a path that starts at the top of the repo
-        pass
+        pathToRepo = os.path.dirname( self.abspath)
+        abspath = os.path.abspath(abspath)
+        assert abspath.index( pathToRepo) == 0
+        pathFromRepo = abspath[ len(pathToRepo)+1:]
+        return pathFromRepo
+
+    def toAbspath(self, repopath):
+        pathToRepo = os.path.dirname( self.abspath)
+        abspath = os.path.join( pathToRepo, repopath)
+        return abspath
 
     @staticmethod
     def loadRepo(startDir='.'):

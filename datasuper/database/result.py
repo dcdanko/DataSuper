@@ -14,7 +14,11 @@ class ResultRecord( BaseRecord):
             self._provenance = []           
         self.resultType = self.repo.validateResultType( kwargs['result_type'])
         try:
-            fileRecs = self.db.asPKs(kwargs['file_records'])
+            fileRecs = kwargs['file_records']
+            try:
+                fileRecs = { k: self.db.asPK(v) for k, v in fileRecs.items()}
+            except AttributeError:
+                fileRecs = [ self.db.asPK(el) for el in fileRecs]
         except KeyError:
             fileRecs = None
         # this will return a list of primary keys or a
@@ -32,8 +36,9 @@ class ResultRecord( BaseRecord):
     def files(self):
         if type(self._fileRecords) == dict:
             out = {}
-            for k, fr in self._fileRecords:
+            for k, fr in self._fileRecords.items():
                 out[k] = self.db.fileTable.get(fr)
+            return out
         else:
             return self.db.fileTable.getMany( self._fileRecords)
     
@@ -50,7 +55,7 @@ class ResultRecord( BaseRecord):
 
 
     def instantiateResultSchema(self, fileRecs):
-        schema = self.repo.getResultSchema[self.resultType]
+        schema = self.repo.getResultSchema(self.resultType)
         if type(schema) == list:
             if fileRecs is None:
                 return [None for _ in schema]
@@ -76,8 +81,12 @@ class ResultRecord( BaseRecord):
 
     def tree(self, raw=False):
         out = {'label': self.name, 'nodes':[]}
-        for fr in self.files():
-            out['nodes'].append( fr.filepath)
+        try:
+            for key, fr in self.files().items():
+                out['nodes'].append( '{} {}'.format(key,fr.name))
+        except AttributeError:
+            for fr in self.files():
+                out['nodes'].append( '{}'.format(fr.name))
         if raw:
             return out
         else:

@@ -37,5 +37,8 @@ class PersistentDict:
     def __contains__(self, key):
         return key in self.savedDict
 
-    def keys():
-        return self.savedDic.keys()
+    def keys(self):
+        return self.savedDict.keys()
+
+    def items(self):
+        return self.savedDict.items()

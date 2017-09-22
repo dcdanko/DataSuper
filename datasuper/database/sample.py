@@ -1,5 +1,6 @@
 from .base_record import *
 from pyarchy import archy
+from .result import *
 
 class SampleRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
@@ -24,6 +25,13 @@ class SampleRecord( BaseRecord):
                 return False
         return True
 
+    def addResult(self, result):
+        if issubclass( type(result), BaseRecord):
+            result = result.primaryKey
+        result = self.db.asPK( result)
+        self._results.append( result)
+
+    
     def results(self):
         return self.db.resultTable.getMany(self._results)
             

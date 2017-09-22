@@ -31,13 +31,16 @@ class DatabaseTable:
 
         del self.db.nameToPKTable[oldName]
         self.db.nameToPKTable[newName] = primaryKey
-        self.db.pkToNameTable[newName] = newName
+        self.db.pkToNameTable[priamryKey] = newName
         
         return self.get(primaryKey)
 
     
     def exists(self, primaryKey):
-        primaryKey = self.db.asPK( primaryKey)
+        try:
+            primaryKey = self.db.asPK( primaryKey)
+        except KeyError:
+            return False
         return self.tbl.get(where('primary_key') == primaryKey) != None
 
     def getRaw(self, primaryKey):
@@ -77,6 +80,10 @@ class DatabaseTable:
         assert self.db.pkNotUsed(newRecord['primary_key'])
         assert self.db.nameNotUsed(newRecord['name'])
         self.tbl.insert( newRecord)
+        
+        self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']
+        self.db.pkToNameTable[newRecord['primary_key']] = newRecord['name']
+        
         return self.get(newRecord['primary_key'])
         
     def update(self, primaryKey, updatedRecord):

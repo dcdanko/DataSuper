@@ -15,7 +15,12 @@ setuptools.setup(
     package_dir={'datasuper': 'datasuper'},
 
     install_requires=[
-        'Click>=6.0',
+        'click==6.7',
+        'pkg-resources==0.0.0',
+        'py-archy==1.0.1',
+        'PyYAML==3.12',
+        'tinydb==3.5.0',
+        'ujson==1.35',
     ],
 
     entry_points={

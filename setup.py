@@ -16,11 +16,11 @@ setuptools.setup(
 
     install_requires=[
         'click==6.7',
-        'pkg-resources==0.0.0',
         'py-archy==1.0.1',
         'PyYAML==3.12',
         'tinydb==3.5.0',
         'ujson==1.35',
+        'yaml_backed_structs==0.9.0',
     ],
 
     entry_points={

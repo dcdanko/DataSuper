@@ -1,5 +1,5 @@
 import os.path
-from datasuper.persistent import *
+from yaml_backed_structs import *
 from datasuper.database import *
 
 class NoRepoFoundError( Exception):

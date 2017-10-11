@@ -218,9 +218,10 @@ def viewSampleTypes():
 
 @view.command(name='file-types')
 def viewFileTypes():
+    print('name\text')
     repo = Repo.loadRepo()
-    for st in repo.getFileTypes():
-        print(st)
+    for ft in repo.getFileTypes():
+        print('{}\t{}'.format(ft['name'], ft['ext']))
 
 @view.command(name='result-types')
 def viewResultSchema():

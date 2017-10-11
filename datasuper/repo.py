@@ -29,7 +29,7 @@ class Repo:
         self.resultSchema = PersistentDict( resultSchemaPath)
 
         fileTypesPath = os.path.join(self.abspath, Repo.fileTypesRoot)
-        self.fileTypes = PersistentSet( fileTypesPath)
+        self.fileTypes = PersistentDict( fileTypesPath)
 
         sampleTypesPath = os.path.join(self.abspath, Repo.sampleTypesRoot)
         self.sampleTypes = PersistentSet( sampleTypesPath)
@@ -50,12 +50,23 @@ class Repo:
     def getSampleTypes( self):
         return [el for el in self.sampleTypes]
 
-    def addFileType( self, fileType):
+    def addFileType( self, fileType, ext=None):
         if self._notReadOnly():
-            self.fileTypes.add( fileType)
+            if type(fileType) is dict:
+                assert 'name' in fileType
+                name = fileType['name']
+                try:
+                    ext = fileType['ext']
+                except KeyError:
+                    ext = name
+                self.fileTypes[name] = ext
+            else:
+                if ext is None:
+                    ext = fileType
+                self.fileTypes[fileType] = ext
 
     def getFileTypes(self):
-        return [el for el in self.fileTypes]
+        return [{'name': name, 'ext': ext} for name, ext in self.fileTypes.items()]
     
     def addResultSchema( self, resultType, resultSchema):
         if self._notReadOnly():
@@ -98,7 +109,7 @@ class Repo:
         return abspath
 
     @staticmethod
-    def loadRepo(startDir='.'):
+    def loadRepo(startDir='.', recurse=True):
         startPath = os.path.abspath( startDir)
         if Repo.repoDirName in os.listdir( startPath):
             repoPath = os.path.join( startPath, Repo.repoDirName)
@@ -106,14 +117,18 @@ class Repo:
         up = os.path.dirname(abspath)
         if up == startPath:
             raise NoRepoFoundError()
-        return loadRepo(startDir=up)
-                
+        if recurse:
+            return loadRepo(startDir=up)
+        else:
+            raise NoRepoFoundError()
+        
     @staticmethod
     def initRepo(targetDir='.'):
         try:
-            os.makedirs( Repo.repoDirName)
-            newRepo = Repo.loadRepo(startDir=targetDir)
-            assert newRepo.abspath == os.path.abspath(targetDir)
+            p = os.path.abspath(targetDir)
+            p = os.path.join(p, Repo.repoDirName)
+            os.makedirs( p)
+            newRepo = Repo.loadRepo(startDir=targetDir, recurse=False)
             return newRepo
         except FileExistsError:
             pass

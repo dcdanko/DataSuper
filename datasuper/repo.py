@@ -67,7 +67,13 @@ class Repo:
 
     def getFileTypes(self):
         return [{'name': name, 'ext': ext} for name, ext in self.fileTypes.items()]
-    
+
+    def getFileTypeExt(self, ftype):
+        try:
+            return self.fileTypes[ftype]
+        except KeyError:
+            raise TypeNotFoundError(ftype)
+
     def addResultSchema( self, resultType, resultSchema):
         if self._notReadOnly():
             self.resultSchema[resultType] = resultSchema
@@ -84,7 +90,7 @@ class Repo:
     def validateResultType(self, resType):
         if resType in self.resultSchema:
             return resType
-        raise TypeNotFoundError()
+        raise TypeNotFoundError(resType)
         
     def validateFileType(self, fileType):
         if fileType in self.fileTypes:

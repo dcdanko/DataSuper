@@ -5,10 +5,8 @@ from .result import *
 class SampleRecord( BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleRecord, self).__init__(repo, **kwargs)
-        try:
-            self._results = self.db.asPKs(kwargs['results']) # n.b. these are keys not objects
-        except KeyError:
-            self._results = []
+        _results = kwargs['results']
+        self._results = self.db.asPKs(_results) # n.b. these are keys not objects
         self.sampleType = self.repo.validateSampleType( kwargs['sample_type'])
         
     def to_dict(self):
@@ -31,9 +29,17 @@ class SampleRecord( BaseRecord):
         result = self.db.asPK( result)
         self._results.append( result)
 
-    
-    def results(self):
-        return self.db.resultTable.getMany(self._results)
+    def results(self, resultTypes=None):
+
+        results = self.db.resultTable.getMany(self._results)
+        if resultTypes is not None:
+            filtered = []
+            rTypes = {rtype for rtype in resultTypes}
+            for result in results:
+                if result.resultType() in rTypes:
+                    filtered.append(result)
+            results = filtered
+        return results
             
     
     def __str__(self):

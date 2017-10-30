@@ -105,6 +105,7 @@ def addResult(name, result_type, fields):
         fileRecs = fields
     
     with Repo.loadRepo() as repo:
+        
         result = ResultRecord(repo, name=name, result_type=result_type, file_records=fileRecs)
         result.save()
 
@@ -248,7 +249,13 @@ def treeGroups():
     repo = Repo.loadRepo()
     for sg in repo.db.sampleGroupTable.getAll():
         sys.stdout.write(sg.tree())
-    
+
+@tree.command(name='samples')
+def treeGroups():
+    repo = Repo.loadRepo()
+    for s in repo.db.sampleTable.getAll():
+        sys.stdout.write(s.tree())
+        
         
     
 ################################################################################

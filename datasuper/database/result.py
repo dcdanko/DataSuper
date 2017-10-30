@@ -12,7 +12,7 @@ class ResultRecord( BaseRecord):
             self._provenance = kwargs['provenance']
         except KeyError: 
             self._provenance = []           
-        self.resultType = self.repo.validateResultType( kwargs['result_type'])
+        self._resultType = self.repo.validateResultType( kwargs['result_type'])
         try:
             fileRecs = kwargs['file_records']
             try:
@@ -24,13 +24,13 @@ class ResultRecord( BaseRecord):
         # this will return a list of primary keys or a
         # map of identifiers -> primary keys (as a dict)
         self._fileRecords = self.instantiateResultSchema( fileRecs)
-        
+
     def to_dict(self):
         out = super(ResultRecord, self).to_dict()
         out['previous_results'] = self._previousResults
         out['provenance'] = self._provenance
         out['file_records'] = self._fileRecords
-        out['result_type'] = self.resultType
+        out['result_type'] = self._resultType
         return out
 
     def files(self):
@@ -38,7 +38,7 @@ class ResultRecord( BaseRecord):
             out = {}
             for k, fr in self._fileRecords.items():
                 out[k] = self.db.fileTable.get(fr)
-            return out
+            return [(k,v) for k,v in out.items()]
         else:
             return self.db.fileTable.getMany( self._fileRecords)
     
@@ -53,9 +53,12 @@ class ResultRecord( BaseRecord):
         # TODO: check that it matches schema
         return True
 
+    def resultType(self):
+        return self._resultType
+    
 
     def instantiateResultSchema(self, fileRecs):
-        schema = self.repo.getResultSchema(self.resultType)
+        schema = self.repo.getResultSchema(self.resultType())
         if type(schema) == list:
             if fileRecs is None:
                 return [None for _ in schema]
@@ -76,7 +79,7 @@ class ResultRecord( BaseRecord):
 
     
     def __str__(self):
-        out = '{}\t{}'.format(self.name, self.resultType)
+        out = '{}\t{}'.format(self.name, self._resultType)
         return out
 
     def tree(self, raw=False):

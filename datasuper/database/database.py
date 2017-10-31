@@ -87,11 +87,11 @@ class Database:
         return pk
     
     def asPKs(self, names):
-        # convert a list of names into a list of pks
+        # convert a list of names into a set of pks
         self._buildPKNameTables()        
-        pks = []
+        pks = set()
         for name in names:
-            pks.append( self.asPK(name))
+            pks.add( self.asPK(name))
         return pks
 
     def asName(self, pks):

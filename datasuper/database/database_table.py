@@ -2,6 +2,7 @@ from tinydb import where, Query
 from random import choice as rchoice
 import string
 import sys
+from .database_exceptions import *
 
 class RepoReadOnlyError( Exception):
     pass
@@ -77,8 +78,12 @@ class DatabaseTable:
             raise RepoReadOnlyError()
         assert newRecord['primary_key'] is None # idiot check myself
         newRecord['primary_key'] = self._newPrimaryKey()
-        assert self.db.pkNotUsed(newRecord['primary_key'])
-        assert self.db.nameNotUsed(newRecord['name'])
+
+        if not self.db.pkNotUsed(newRecord['primary_key']):
+            raise RecordExistsError(newRecord)
+        if not self.db.nameNotUsed(newRecord['name']):
+            raise RecordExistsError(newRecord)
+        
         self.tbl.insert( newRecord)
         
         self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']

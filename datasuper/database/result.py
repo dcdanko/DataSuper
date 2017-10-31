@@ -44,8 +44,10 @@ class ResultRecord( BaseRecord):
     
     def validStatus(self):
         fs = self.files()
-        if type(fs) == dict:
-            fs = fs.values()
+        if len(fs) == 0:
+            return True
+        if len(fs[0]) == 2:
+            fs = [el[1] for el in fs]
         for fileRec in fs:
             if not fileRec.validStatus():
                 return False
@@ -85,7 +87,7 @@ class ResultRecord( BaseRecord):
     def tree(self, raw=False):
         out = {'label': self.name, 'nodes':[]}
         try:
-            for key, fr in self.files().items():
+            for key, fr in self.files():
                 out['nodes'].append( '{} {}'.format(key,fr.name))
         except AttributeError:
             for fr in self.files():

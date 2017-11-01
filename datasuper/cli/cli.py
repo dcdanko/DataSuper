@@ -259,6 +259,19 @@ def treeGroups():
         
     
 ################################################################################
+
+@main.group()
+def remove():
+    pass
+
+@remove.command(name='results')
+@click.argument('result_names', nargs=-1)
+def removeResults(result_names):
+    with Repo.loadRepo() as repo:
+        for result in repo.db.resultTable.getMany(result_names):
+            result.remove()
     
+
+
 if __name__ == '__main__':
     main()

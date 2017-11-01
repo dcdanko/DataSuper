@@ -40,7 +40,7 @@ class ResultRecord( BaseRecord):
                 out[k] = self.db.fileTable.get(fr)
             return [(k,v) for k,v in out.items()]
         else:
-            return self.db.fileTable.getMany( self._fileRecords)
+            return [(i, el) for i, el in enumerate(self.db.fileTable.getMany( self._fileRecords))]
     
     def validStatus(self):
         fs = self.files()
@@ -97,3 +97,16 @@ class ResultRecord( BaseRecord):
         else:
             return archy(out)
 
+    def remove(self, atomic=False):
+        if not atomic:
+            pk = self.primaryKey
+            samples = self.db.sampleTable.getAll()
+            for sample in samples:
+                try:
+                    sample.dropResult(pk)
+                except KeyError:
+                    # the sample did not have this result
+                    pass
+            for name, f in self.files():
+                f.atomicDelete()
+        self.atomicDelete()

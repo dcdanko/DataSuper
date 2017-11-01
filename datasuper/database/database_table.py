@@ -104,8 +104,8 @@ class DatabaseTable:
         primaryKey = self.db.asPK( primaryKey)
         if self.repo.readOnly:
             raise RepoReadOnlyError            
-        rawRecs = self.getRaw( primaryKey)
-        self.tbl.remove(eids=[rawRec.eid])
+        
+        self.tbl.remove(where('primary_key') == primaryKey)
 
 
     

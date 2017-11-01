@@ -101,13 +101,12 @@ class Repo:
         schema = self.resultSchema[resType]
         return schema
         
-    def pathFromRepo(self, abspath):
+    def pathFromRepo(self, fpath):
         # get a path that starts at the top of the repo
         pathToRepo = os.path.dirname( self.abspath)
-        abspath = os.path.abspath(abspath)
-        assert abspath.index( pathToRepo) == 0
-        pathFromRepo = abspath[ len(pathToRepo)+1:]
-        return pathFromRepo
+        abspath = os.path.join(pathToRepo, fpath)
+#       pathFromRepo = abspath[ len(pathToRepo)+1:]
+        return abspath
 
     def toAbspath(self, repopath):
         pathToRepo = os.path.dirname( self.abspath)
@@ -120,11 +119,11 @@ class Repo:
         if Repo.repoDirName in os.listdir( startPath):
             repoPath = os.path.join( startPath, Repo.repoDirName)
             return Repo(repoPath)
-        up = os.path.dirname(abspath)
+        up = os.path.dirname(startPath)
         if up == startPath:
             raise NoRepoFoundError()
         if recurse:
-            return loadRepo(startDir=up)
+            return Repo.loadRepo(startDir=up)
         else:
             raise NoRepoFoundError()
         

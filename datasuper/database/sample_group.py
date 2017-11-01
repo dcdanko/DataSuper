@@ -53,13 +53,13 @@ class SampleGroupRecord( BaseRecord):
         if issubclass( type(sample), BaseRecord):
             sample = sample.primaryKey
         sample = self.db.asPK(sample)
-        self._directSamples.append(sample)
+        self._directSamples.add(sample)
 
     def addResult(self, result):
         if issubclass( type(result), BaseRecord):
             result = result.primaryKey
         result = self.db.asPK( result)
-        self._directResults.append( result)
+        self._directResults.add( result)
 
         
     def directSamples(self):
@@ -75,16 +75,28 @@ class SampleGroupRecord( BaseRecord):
     def directResults(self):
         return self.db.resultTable.getMany( self._directResults)
 
-    def allResults(self):
+    def allResults(self, resultTypes=None):
+        results = []
         for res in self.directResults():
-            yield res
+            results.append(res)
         for sample in self.directSamples():
             for res in sample.results():
-                yield res
+                results.append(res)
         for subgroup in self.subgroups():
             for res in subgroup.allResults():
-                yield res
-    
+                results.append(res)
+
+        if resultTypes is not None:
+            filtered = []
+            rTypes = {rtype for rtype in resultTypes}
+            for result in results:
+                if result.resultType() in rTypes:
+                    filtered.append(result)
+            results = filtered
+        return results
+
+
+                
     def subgroups(self):
         return self.dbTable.getMany( self._subgroups)
     

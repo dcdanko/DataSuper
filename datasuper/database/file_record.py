@@ -28,7 +28,10 @@ class FileRecord( BaseRecord):
     
     def validStatus(self):
         if self.cachedValid is None:
-            self.cachedValid = self.checksum == self._currentChecksum()
+            try:
+                self.cachedValid = self.checksum == self._currentChecksum()
+            except FileNotFoundError:
+                self.cachedValid = False
         return self.cachedValid
     
     def __str__(self):

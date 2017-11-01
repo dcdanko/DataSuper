@@ -43,8 +43,12 @@ class BaseRecord:
     def rename(self, newName):
         self.dbTable.rename( self.primaryKey, newName)
         self.name = newName
+
+
+    def remove(self):
+        raise NotImplementedError()
         
-    def delete(self):
+    def atomicDelete(self):
         self.dbTable.remove(self.primaryKey)
 
     def raw(self):
@@ -53,6 +57,7 @@ class BaseRecord:
     def validStatus(self):
         raise NotImplementedError()
 
+    
     def to_dict(self):
         out = {
             'primary_key' : self.primaryKey,
@@ -61,4 +66,4 @@ class BaseRecord:
             }
         return out
     
-        
+    

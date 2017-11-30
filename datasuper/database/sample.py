@@ -29,10 +29,10 @@ class SampleRecord(BaseRecord):
         return True
 
     def addResult(self, result):
-        if issubclass( type(result), BaseRecord):
+        if issubclass(type(result), BaseRecord):
             result = result.primaryKey
-        result = self.db.asPK( result)
-        self._results.add( result)
+        result = self.db.asPK(result)
+        self._results.add(result)
 
     def dropResult(self, result):
         # still requires the sample to be saved!

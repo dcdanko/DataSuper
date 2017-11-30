@@ -102,7 +102,7 @@ class Repo:
     def validateFileType(self, fileType):
         if fileType in self.fileTypes:
             return fileType
-        raise TypeNotFoundError()
+        raise TypeNotFoundError(fileType)
 
     def getResultSchema(self, resType):
         schema = self.resultSchema[resType]

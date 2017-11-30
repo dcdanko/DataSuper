@@ -92,7 +92,7 @@ class ResultRecord(BaseRecord):
         out = {'label': self.name, 'nodes':[]}
         try:
             for key, fr in self.files():
-                out['nodes'].append( '{} {}'.format(key,fr.name))
+                out['nodes'].append('{} {}'.format(key, str(fr)))
         except AttributeError:
             for fr in self.files():
                 out['nodes'].append( '{}'.format(fr.name))

@@ -92,7 +92,7 @@ class Repo:
     def validateSampleType(self, sampleType):
         if sampleType in self.sampleTypes:
             return sampleType
-        raise TypeNotFoundError()
+        raise TypeNotFoundError(str(sampleType))
 
     def validateResultType(self, resType):
         if resType in self.resultSchema:

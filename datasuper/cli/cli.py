@@ -254,13 +254,13 @@ def viewResultSchema():
     repo = Repo.loadRepo()
     for rt in repo.getResultTypes():
         schema = repo.getResultSchema(rt)
-        out = '{} '.format(rt)
+        sout = '{} '.format(rt)
         try:
             for k, v in schema.items():
-                out += '{}:{} '.format(k, v)
+                sout += '{}:{} '.format(k, v)
         except AttributeError:
-            out += ' '.join(schema)
-        print(out)
+            sout += ' '.join(schema)
+        print(sout)
 
 
 ###############################################################################

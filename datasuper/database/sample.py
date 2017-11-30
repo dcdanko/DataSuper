@@ -2,13 +2,18 @@ from .base_record import *
 from pyarchy import archy
 from .result import *
 
-class SampleRecord( BaseRecord):
+
+class SampleRecord(BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleRecord, self).__init__(repo, **kwargs)
-        _results = kwargs['results']
-        self._results = self.db.asPKs(_results) # n.b. these are keys not objects
-        self.sampleType = self.repo.validateSampleType( kwargs['sample_type'])
-        
+        try:
+            _results = kwargs['results']
+        except KeyError:
+            _results = []
+        self._results = self.db.asPKs(_results)
+        # n.b. these are keys not objects
+        self.sampleType = self.repo.validateSampleType(kwargs['sample_type'])
+
     def to_dict(self):
         out = super(SampleRecord,  self).to_dict()
         out['results'] = self._results
@@ -47,6 +52,7 @@ class SampleRecord( BaseRecord):
                 if result.resultType() in rTypes:
                     filtered.append(result)
             results = filtered
+
         return results
             
     

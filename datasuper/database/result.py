@@ -1,29 +1,34 @@
 from .base_record import *
 from pyarchy import archy
 
-class ResultRecord( BaseRecord):
+
+class ResultRecord(BaseRecord):
     def __init__(self, repo, **kwargs):
         super(ResultRecord, self).__init__(repo, **kwargs)
         try:
             self._previousResults = self.db.asPKs(kwargs['previous_results'])
         except KeyError:
             self._previousResults = []
+        
         try:
             self._provenance = kwargs['provenance']
-        except KeyError: 
-            self._provenance = []           
-        self._resultType = self.repo.validateResultType( kwargs['result_type'])
+        except KeyError:
+            self._provenance = []
+        self._resultType = self.repo.validateResultType(kwargs['result_type'])
+
         try:
             fileRecs = kwargs['file_records']
             try:
-                fileRecs = { k: self.db.asPK(v) for k, v in fileRecs.items()}
+                fileRecs = {k: self.db.asPK(v) for k, v in fileRecs.items()}
             except AttributeError:
-                fileRecs = [ self.db.asPK(el) for el in fileRecs]
+                fileRecs = [self.db.asPK(el) for el in fileRecs]
         except KeyError:
-            fileRecs = None
+            raise
+            
+
         # this will return a list of primary keys or a
         # map of identifiers -> primary keys (as a dict)
-        self._fileRecords = self.instantiateResultSchema( fileRecs)
+        self._fileRecords = self.instantiateResultSchema(fileRecs)
 
     def to_dict(self):
         out = super(ResultRecord, self).to_dict()
@@ -40,7 +45,7 @@ class ResultRecord( BaseRecord):
                 out[k] = self.db.fileTable.get(fr)
             return [(k,v) for k,v in out.items()]
         else:
-            return [(i, el) for i, el in enumerate(self.db.fileTable.getMany( self._fileRecords))]
+            return [(i, el) for i, el in enumerate(self.db.fileTable.getMany(self._fileRecords))]
     
     def validStatus(self):
         fs = self.files()
@@ -57,7 +62,6 @@ class ResultRecord( BaseRecord):
 
     def resultType(self):
         return self._resultType
-    
 
     def instantiateResultSchema(self, fileRecs):
         schema = self.repo.getResultSchema(self.resultType())
@@ -69,13 +73,13 @@ class ResultRecord( BaseRecord):
                 return fileRecs
         elif type(schema) == dict:
             if fileRecs is None:
-                return {k:None for k in schema.keys()}
+                return {k: None for k in schema.keys()}
             else:
                 for k,v in fileRecs.items():
                     assert k in schema
                 return fileRecs
         else:
-            assert type(fileRecs) == str
+            #assert type(fileRecs) in [str,Path
             return fileRecs
 
 

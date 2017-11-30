@@ -82,7 +82,10 @@ class Database:
             if name in self.pkToNameTable:
                 pk = name
             else:
-                raise ke
+                try:
+                    pk = name.primaryKey
+                except AttributeError:
+                    raise ke
         return pk
 
     def asPKs(self, names):

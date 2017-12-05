@@ -23,6 +23,7 @@ class Repo:
     sampleTypesRoot = 'sample-types.yml'
 
     def __init__(self, abspath):
+        self.closed = False
         self.abspath = abspath
         self.readOnly = True
 
@@ -44,6 +45,7 @@ class Repo:
 
     def close(self):
         self.db.close()
+        self.closed = True
 
     def _notReadOnly(self):
         if self.readOnly:
@@ -147,6 +149,10 @@ class Repo:
         raise RepoAlreadyExistsError()
 
     def __enter__(self):
+        if self.closed:
+            reopen = Repo.loadRepo(startDir=self.abspath)
+            reopen.readOnly = False
+            return reopen
         self.readOnly = False
         return self
 

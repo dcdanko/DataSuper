@@ -45,7 +45,7 @@ def makeResult(repo, name, resultType, fileRecs, modify=False):
 
 def getOrMakeResult(repo, name, resultType, fileRecs):
     try:
-        result = repo.resultTable.get(rname)
+        result = repo.resultTable.get(name)
     except KeyError:
         result = makeResult(repo, name, resultType, fileRecs)
     return result

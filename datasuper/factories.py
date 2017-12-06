@@ -18,7 +18,7 @@ def getOrMakeSample(repo, name, sampleType):
 
 
 def makeFile(repo, name, filepath, filetype, modify=False):
-    fr = ds.FileRecord(repo,
+    fr = FileRecord(repo,
                        name=name,
                        filepath=filepath,
                        file_type=filetype)
@@ -35,10 +35,10 @@ def getOrMakeFile(repo, name, filepath, filetype):
 
 
 def makeResult(repo, name, resultType, fileRecs, modify=False):
-    result = ds.ResultRecord(repo,
-                             name=name,
-                             result_type=resultType,
-                             file_records=fileRecs)
+    result = ResultRecord(repo,
+                          name=name,
+                          result_type=resultType,
+                          file_records=fileRecs)
     result = result.save()
     return result
 

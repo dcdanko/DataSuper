@@ -33,6 +33,7 @@ class SampleRecord(BaseRecord):
             result = result.primaryKey
         result = self.db.asPK(result)
         self._results.add(result)
+        return self
 
     def dropResult(self, result):
         # still requires the sample to be saved!

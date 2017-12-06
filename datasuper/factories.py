@@ -39,7 +39,7 @@ def makeResult(repo, name, resultType, fileRecs, modify=False):
                           name=name,
                           result_type=resultType,
                           file_records=fileRecs)
-    result = result.save()
+    result = result.save(modify=modify)
     return result
 
 

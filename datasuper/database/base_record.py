@@ -36,10 +36,9 @@ class BaseRecord:
             return self.dbTable.get(self.primaryKey)
         elif nameExists and modify:
             other = self.dbTable.get(self.name)
-            rec = other.to_dict()
-            rec = self._mergeDicts(rec)
-            self.dbTable.update(other.primaryKey, rec)
-            return self.dbTable.get(other.primaryKey)
+            rec = other._mergeDicts(self.to_dict())
+            other.dbTable.update(other.primaryKey, rec)
+            return other.dbTable.get(other.primaryKey)
         else:
             return self.dbTable.insert(self.to_dict())
 

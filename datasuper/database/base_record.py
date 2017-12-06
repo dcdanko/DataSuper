@@ -18,27 +18,40 @@ class BaseRecord:
     def exists(self):
         return self.dbTable.exists(self.primaryKey)
 
+    def nameExists(self):
+        return self.dbTable.exists(self.name)
+
     def save(self, modify=False):
         if not self.validStatus():
             raise InvalidRecordStateError()
 
-        alreadyExists = self.exists()
-        if alreadyExists and not modify:
+        pkExists = self.exists()
+        nameExists = self.nameExists()
+        if (pkExists or nameExists) and not modify:
             raise RecordExistsError()
-        elif alreadyExists and modify:
+        elif pkExists and modify:
             rec = self.dbTable.get(self.primaryKey).to_dict()
-            mydict = self.to_dict()
-            for k,v in mydict.items():
-                if k in rec and type(v) == dict and type(rec[k]) == dict:
-                    for subk, subv in v.items():
-                        rec[k][subk] = subv
-                else:
-                    rec[k] = v
+            rec = self._mergeDicts(rec)
             self.dbTable.update(self.primaryKey, rec)
             return self.dbTable.get(self.primaryKey)
+        elif nameExists and modify:
+            other = self.dbTable.get(self.name)
+            rec = other.to_dict()
+            rec = self._mergeDicts(rec)
+            self.dbTable.update(other.primaryKey, rec)
+            return self.dbTable.get(other.primaryKey)
         else:
             return self.dbTable.insert(self.to_dict())
 
+    def _mergeDicts(self, rec):
+        mydict = self.to_dict()
+        for k, v in mydict.items():
+            if k in rec and type(v) == dict and type(rec[k]) == dict:
+                for subk, subv in v.items():
+                    rec[k][subk] = subv
+            else:
+                rec[k] = v
+        return rec
 
     def rename(self, newName):
         self.dbTable.rename( self.primaryKey, newName)

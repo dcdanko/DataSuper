@@ -38,3 +38,7 @@ class FileRecord( BaseRecord):
         out = '{}\t{}'.format(self.name, self.filepath())
         return out
 
+    def remove(self, atomic=False):
+        if not atomic:
+            raise NotImplementedError()
+        self.atomicDelete()

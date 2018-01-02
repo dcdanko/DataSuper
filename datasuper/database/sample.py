@@ -37,12 +37,12 @@ class SampleRecord(BaseRecord):
 
     def dropResult(self, result):
         # still requires the sample to be saved!
-        if issubclass( type(result), BaseRecord):
+        if issubclass(type(result), BaseRecord):
             result = result.primaryKey
-        result = self.db.asPK( result)
-        self._results.remove( result)
+        result = self.db.asPK(result)
+        self._results.remove(result)
 
-        
+
     def results(self, resultTypes=None):
 
         results = self.db.resultTable.getMany(self._results)

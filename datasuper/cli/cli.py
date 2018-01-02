@@ -301,5 +301,13 @@ def removeResults(result_names):
             result.remove()
 
 
+@remove.command(name='files')
+@click.argument('file_names', nargs=-1)
+def removeResults(file_names):
+    with Repo.loadRepo() as repo:
+        for fileRec in repo.db.fileTable.getMany(file_names):
+            fileRec.remove(atomic=True)
+
+
 if __name__ == '__main__':
     main()

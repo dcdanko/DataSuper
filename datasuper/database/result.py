@@ -75,7 +75,7 @@ class ResultRecord(BaseRecord):
             if fileRecs is None:
                 return {k: None for k in schema.keys()}
             else:
-                for k,v in fileRecs.items():
+                for k, v in fileRecs.items():
                     assert k in schema
                 return fileRecs
         else:

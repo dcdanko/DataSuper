@@ -1,0 +1,4 @@
+click==6.7
+yaml-backed-structs==0.9.0
+tinydb==3.5.0
+py-archy==1.0.1

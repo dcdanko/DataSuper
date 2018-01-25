@@ -278,6 +278,24 @@ def remove():
     pass
 
 
+@remove.command(name='invalids')
+@click.option('--confirmed/--not-confirmed', default=False)
+def removeInvalids(confirmed):
+    with Repo.loadRepo() as repo:
+        toRemove = []
+        toRemove += repo.db.sampleGroupTable.getInvalids()
+        toRemove += repo.db.sampleTable.getInvalids()
+        toRemove += repo.db.resultTable.getInvalids()
+        toRemove += repo.db.fileTable.getInvalids()
+        print('Removing {} objects'.format(len(toRemove)))
+        if not confirmed:
+            print('Remove not confirmed. Aborting.', file=sys.stderr)
+            return
+        repo.db.sampleGroupTable.removeInvalids()
+        repo.db.sampleTable.removeInvalids()
+        repo.db.resultTable.removeInvalids()
+        repo.db.fileTable.removeInvalids()
+
 @remove.command(name='results')
 @click.argument('result_names', nargs=-1)
 def removeResults(result_names):

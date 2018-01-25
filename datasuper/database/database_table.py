@@ -93,7 +93,7 @@ class DatabaseTable:
         if not self.db.nameNotUsed(newRecord['name']):
             raise RecordExistsError(newRecord)
         
-        self.tbl.insert( newRecord)
+        self.tbl.insert(newRecord)
         
         self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']
         self.db.pkToNameTable[newRecord['primary_key']] = newRecord['name']
@@ -101,7 +101,7 @@ class DatabaseTable:
         return self.get(newRecord['primary_key'])
         
     def update(self, primaryKey, updatedRecord):
-        primaryKey = self.db.asPK( primaryKey)
+        primaryKey = self.db.asPK(primaryKey)
         if self.repo.readOnly:
             raise RepoReadOnlyError
         rawRec = self.getRaw( primaryKey)
@@ -110,11 +110,33 @@ class DatabaseTable:
         return self.get(primaryKey)
     
     def remove(self, primaryKey):
-        primaryKey = self.db.asPK( primaryKey)
+        primaryKey = self.db.asPK(primaryKey)
         if self.repo.readOnly:
-            raise RepoReadOnlyError            
+            raise RepoReadOnlyError
         
         self.tbl.remove(where('primary_key') == primaryKey)
+
+    def getInvalids(self):
+        out = []
+        for rawRec in self.tbl.all():
+            try:
+                self.typeStored(self.repo, **rawRec)
+            except InvalidRecordStateError:
+                out.append(rawRec['primary_key'])
+        return out
+
+    def removeInvalids(self):
+        if self.repo.readOnly:
+            raise RepoReadOnlyError
+        toRemove = []
+        for rawRec in self.tbl.all():
+            try:
+                self.typeStored(self.repo, **rawRec)
+            except InvalidRecordStateError:
+                toRemove.append(rawRec['primary_key'])
+        for pk in toRemove:
+            self.tbl.remove(where('primary_key') == pk)
+
 
 
     

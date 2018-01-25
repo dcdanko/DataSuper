@@ -4,7 +4,7 @@ class BaseRecord:
     def __init__(self, repo, **kwargs):
         self.repo = repo
         self.db = repo.db
-        self.dbTable = self.db.getTable( type(self))
+        self.dbTable = self.db.getTable(type(self))
         self.name = kwargs['name']
         try:
             self.primaryKey = kwargs['primary_key']
@@ -40,8 +40,11 @@ class BaseRecord:
             other.dbTable.update(other.primaryKey, rec)
             return other.dbTable.get(other.primaryKey)
         else:
-            return self.dbTable.insert(self.to_dict())
+            savedSelf = self.dbTable.insert(self.to_dict())
+            self.primaryKey = savedSelf.primaryKey
+            return savedSelf
 
+            
     def _mergeDicts(self, rec):
         mydict = self.to_dict()
         for k, v in mydict.items():
@@ -67,6 +70,12 @@ class BaseRecord:
         return self.dbTable.getRaw( self.primaryKey)
 
     def validStatus(self):
+        try:
+            return self._validStatus()
+        except Exception:
+            return False
+
+    def _validStatus(self):
         raise NotImplementedError()
 
     

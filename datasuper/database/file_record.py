@@ -5,6 +5,7 @@ class FileRecord( BaseRecord):
     
     def __init__(self, repo, **kwargs):
         super(FileRecord, self).__init__(repo, **kwargs)
+
         self._filepath = self.repo.pathFromRepo(kwargs['filepath'])
         self.fileType = self.repo.validateFileType( kwargs['file_type'])        
         try:
@@ -26,7 +27,7 @@ class FileRecord( BaseRecord):
     def _currentChecksum(self):
         return hashlib.sha256(open(self.filepath(), 'rb').read(4096)).hexdigest()
     
-    def validStatus(self):
+    def _validStatus(self):
         if self.cachedValid is None:
             try:
                 self.cachedValid = self.checksum == self._currentChecksum()

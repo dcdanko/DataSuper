@@ -10,17 +10,20 @@ class SampleRecord(BaseRecord):
             _results = kwargs['results']
         except KeyError:
             _results = []
-        self._results = self.db.asPKs(_results)
+        try:
+            self._results = self.db.asPKs(_results)
+        except KeyError:
+            raise InvalidRecordStateError('Could not convert key to result')
         # n.b. these are keys not objects
         self.sampleType = self.repo.validateSampleType(kwargs['sample_type'])
 
     def to_dict(self):
-        out = super(SampleRecord,  self).to_dict()
+        out = super(SampleRecord, self).to_dict()
         out['results'] = self._results
         out['sample_type'] = str(self.sampleType)
         return out
 
-    def validStatus(self):
+    def _validStatus(self):
         for res in self.results():
             if type(res) != ResultRecord:
                 return False

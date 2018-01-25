@@ -46,16 +46,16 @@ class DatabaseTable:
 
     def getRaw(self, primaryKey):
         primaryKey = self.db.asPK( primaryKey)        
-        return self.tbl.get(where('primary_key') == primaryKey) 
+        return self.tbl.get(where('primary_key') == primaryKey)
     
     def get(self, primaryKey):
         primaryKey = self.db.asPK( primaryKey)        
         rawRec = self.tbl.get(where('primary_key') == primaryKey)
-        rec = self.typeStored( self.repo, **rawRec)
+        rec = self.typeStored(self.repo, **rawRec)
         return rec
         
     def getMany(self, primaryKeys):
-        primaryKeys = self.db.asPKs( primaryKeys)
+        primaryKeys = self.db.asPKs(primaryKeys)
         '''
         print(primaryKeys)
         Q = Query()
@@ -67,10 +67,19 @@ class DatabaseTable:
         '''
         recs = [self.get(pk) for pk in primaryKeys]
         return recs
+
+    def size(self):
+        return len(self.tbl.all())
     
     def getAll(self):
         rawRecs = self.tbl.all()
-        recs = [self.typeStored( self.repo, **rawRec) for rawRec in rawRecs]
+        recs = [self.typeStored(self.repo, **rawRec) for rawRec in rawRecs]
+        return recs
+
+    def getAllLazily(self):
+        rawRecs = self.tbl.all()
+        recs = ((rawRec['name'], lambda: self.typeStored(self.repo, **rawRec))
+                for rawRec in rawRecs)
         return recs
     
     def insert(self, newRecord):
@@ -88,7 +97,7 @@ class DatabaseTable:
         
         self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']
         self.db.pkToNameTable[newRecord['primary_key']] = newRecord['name']
-        
+
         return self.get(newRecord['primary_key'])
         
     def update(self, primaryKey, updatedRecord):

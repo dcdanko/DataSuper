@@ -19,49 +19,34 @@ def init():
 ###############################################################################
 
 
+def tableStatus(tbl, name):
+    ngrps = tbl.size()
+    grps = tbl.getAllLazily()
+    sys.stdout.write('\n{} {}... '.format(ngrps, name))
+    allGood = True
+    for name, grp in grps:
+        try:
+            grp = grp()
+        except InvalidRecordStateError:
+            allGood = False
+            sys.stdout.write('\n - {} failed'.format(name))
+            continue
+        if not grp.validStatus():
+            allGood = False
+            sys.stdout.write('\n - {} failed'.format(name))
+    if allGood:
+        sys.stdout.write('all good.')
+
+
 @main.command()
 def status():
     repo = Repo.loadRepo()
-    grps = repo.db.sampleGroupTable.getAll()
-    sys.stdout.write('{} sample groups... '.format(len(grps)))
-    allGood = True
-    for grp in grps:
-        if not grp.validStatus():
-            allGood = False
-            sys.stdout.write('\n{} failed'.format(grp.name))
-    if allGood:
-        sys.stdout.write('all good.')
-
-    samples = repo.db.sampleTable.getAll()
-    sys.stdout.write('\n{} samples... '.format(len(samples)))
-    allGood = True
-    for sample in samples:
-        if not sample.validStatus():
-            allGood = False
-            sys.stdout.write('\n{} failed'.format(sample.name))
-    if allGood:
-        sys.stdout.write('all good.')
-
-    results = repo.db.resultTable.getAll()
-    sys.stdout.write('\n{} results... '.format(len(results)))
-    allGood = True
-    for result in results:
-        if not result.validStatus():
-            allGood = False
-            sys.stdout.write('\n{} failed'.format(result.name))
-    if allGood:
-        sys.stdout.write('all good.')
-
-    fileRecs = repo.db.fileTable.getAll()
-    sys.stdout.write('\n{} files... '.format(len(fileRecs)))
-    allGood = True
-    for fileRec in fileRecs:
-        if not fileRec.validStatus():
-            allGood = False
-            sys.stdout.write('\n{} failed'.format(fileRec.name))
-    if allGood:
-        sys.stdout.write('all good.')
-    sys.stdout.write('\n')
+    sys.stdout.write('Checking status')
+    tableStatus(repo.db.sampleGroupTable, 'sample groups')
+    tableStatus(repo.db.sampleTable, 'samples')
+    tableStatus(repo.db.resultTable, 'results')
+    tableStatus(repo.db.fileTable, 'files')
+    sys.stdout.write('\nDone\n')
 
 
 ###############################################################################

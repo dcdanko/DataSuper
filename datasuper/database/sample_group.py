@@ -22,7 +22,7 @@ class SampleGroupRecord( BaseRecord):
         except KeyError:
             self._directResults = []
             
-    def validStatus(self):
+    def _validStatus(self):
         for subgroup in self.subgroups():
             if subgroup.primaryKey == self.primaryKey:
                 return False

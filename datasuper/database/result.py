@@ -24,12 +24,12 @@ class ResultRecord(BaseRecord):
                 fileRecs = [self.db.asPK(el) for el in fileRecs]
         except KeyError:
             raise
-            
 
         # this will return a list of primary keys or a
         # map of identifiers -> primary keys (as a dict)
         self._fileRecords = self.instantiateResultSchema(fileRecs)
 
+        
     def to_dict(self):
         out = super(ResultRecord, self).to_dict()
         out['previous_results'] = self._previousResults
@@ -47,7 +47,7 @@ class ResultRecord(BaseRecord):
         else:
             return [(i, el) for i, el in enumerate(self.db.fileTable.getMany(self._fileRecords))]
     
-    def validStatus(self):
+    def _validStatus(self):
         fs = self.files()
         if len(fs) == 0:
             return True

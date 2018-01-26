@@ -111,9 +111,15 @@ class Repo:
         return schema
 
     def pathFromRepo(self, fpath):
+        '''
+        returns an absolute path found from the top of the repo
+        
+        this means that the correct path will be found even if this
+        is called from a subdirectory
+        '''
         # get a path that starts at the top of the repo
         pathToRepo = os.path.dirname(self.abspath)
-        abspath = os.path.join(pathToRepo, fpath)
+        abspath = os.path.abspath(os.path.join(pathToRepo, fpath))
 #       pathFromRepo = abspath[ len(pathToRepo)+1:]
         return abspath
 

@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="DataSuper",
-    version="0.1.0",
+    version="0.9.0",
     url="https://github.com/dcdanko/DataSuper",
 
     author="David C. Danko",
@@ -30,7 +30,7 @@ setuptools.setup(
     },
 
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',

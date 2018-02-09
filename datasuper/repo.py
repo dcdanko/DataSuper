@@ -1,21 +1,24 @@
 import os.path
 from yaml_backed_structs import *
 from datasuper.database import *
-
-
-class NoRepoFoundError(Exception):
-    pass
-
-
-class RepoAlreadyExistsError(Exception):
-    pass
-
-
-class TypeNotFoundError(Exception):
-    pass
+from .errors import *
 
 
 class Repo:
+    '''Represents a repo that stores records and config values.
+
+    Attributes:
+        db (datasuper.Database): The database that contains all records.
+        fileTable (datasuper.DatabaseTable): Alias to db.fileTable. The
+            table that contains file records.
+        resultTable (datasuper.DatabaseTable): Alias to db.resultTable. The
+            table that contains result records.
+        sampleTable (datasuper.DatabaseTable): Alias to db.sampleTable. The
+            table that contains sample records.
+        sampleGroupTable (datasuper.DatabaseTable): Alias to
+            db.sampleGroupTable. The table that contains sample-group records.
+
+    '''
     repoDirName = '.datasuper'
     dbRoot = 'datasuper.tinydb.json'
     resultSchemaRoot = 'result-schemas.yml'
@@ -44,6 +47,7 @@ class Repo:
         self.sampleTypes = PersistentSet(sampleTypesPath)
 
     def close(self):
+        '''Close the repo to further write operations.'''
         self.db.close()
         self.closed = True
 
@@ -53,13 +57,16 @@ class Repo:
         return True
 
     def addSampleType(self, sampleType):
+        '''Add a new sampleType (str) to the repo.'''
         if self._notReadOnly():
             self.sampleTypes.add(sampleType)
 
     def getSampleTypes(self):
+        '''Return a list of sample types in the repo.'''
         return [el for el in self.sampleTypes]
 
     def addFileType(self, fileType, ext=None):
+        '''Add a new fileType to the repo with optional extension.'''
         if self._notReadOnly():
             if type(fileType) is dict:
                 assert 'name' in fileType
@@ -75,52 +82,65 @@ class Repo:
                 self.fileTypes[fileType] = ext
 
     def getFileTypes(self):
+        '''Return a list of file types in the repo.'''
         fTypes = self.fileTypes.items()
         return [{'name': name, 'ext': ext} for name, ext in fTypes]
 
-    def getFileTypeExt(self, ftype):
+    def getFileTypeExt(self, fileType):
+        '''Return the extension for a given fileType.'''
         try:
-            return self.fileTypes[ftype]
+            return self.fileTypes[fileType]
         except KeyError:
-            raise TypeNotFoundError(ftype)
+            raise TypeNotFoundError(fileType)
 
     def addResultSchema(self, resultType, resultSchema):
+        '''Set a resultSchema for resultType.'''
         if self._notReadOnly():
             self.resultSchema[resultType] = resultSchema
 
     def getResultTypes(self):
+        '''Return a list of result types in the repo.'''
         return [el for el in self.resultSchema.keys()]
 
     def validateSampleType(self, sampleType):
+        '''Return sampleType if it is in the repo, else raise an error.'''
         if sampleType in self.sampleTypes:
             return sampleType
         raise TypeNotFoundError(str(sampleType))
 
     def validateResultType(self, resType):
+        '''Return resultType if it is in the repo, else raise an error.'''
         if resType in self.resultSchema:
             return resType
         raise TypeNotFoundError(resType)
 
     def validateFileType(self, fileType):
+        '''Return fileType if it is in the repo, else raise an error.'''
         if fileType in self.fileTypes:
             return fileType
         raise TypeNotFoundError(fileType)
 
     def getResultSchema(self, resType):
+        '''Return the schema associated with a resType.'''
         schema = self.resultSchema[resType]
         return schema
 
     def pathFromRepo(self, fpath):
+        '''Returns an absolute path found from the top of the repo.
+
+        This function converts a relative path from the top of the repo
+        into an absolute path. If the filepath requested is not in the
+        repo this function just returns an absolute path for that file.
+
+        Args:
+            fpath (str): The relative path to convert.
+
+        Returns:
+            An absolute filepath.
         '''
-        returns an absolute path found from the top of the repo
-        
-        this means that the correct path will be found even if this
-        is called from a subdirectory
-        '''
-        # get a path that starts at the top of the repo
-        pathToRepo = os.path.dirname(self.abspath)
+
+        pathToRepo = os.path.dirname(self.abspath)  # get the repo abspath
         abspath = os.path.abspath(os.path.join(pathToRepo, fpath))
-#       pathFromRepo = abspath[ len(pathToRepo)+1:]
         return abspath
 
     def toAbspath(self, repopath):
@@ -130,6 +150,25 @@ class Repo:
 
     @staticmethod
     def loadRepo(startDir='.', recurse=True):
+        '''Build and return the repo initialized in or above startRepo.
+
+        Search for a repo in `startDir`. If no repo is found recurse to
+        the parent directory unless `recurse` is False. If no repo is
+        found deeper recursion is impossible throw an error:
+
+        Args:
+            startDir (:obj:`str`, optional): The dir to search in. Defaults
+                to the current working directory.
+            recurse (:obj:`bool`, optional): Flag specifying if the fucntion
+                should recurse up.
+
+        Returns:
+            The repo if successful, None otherwise.
+
+        Raises:
+            NoRepoFoundError: If no repo is found.
+        '''
+
         startPath = os.path.abspath(startDir)
         if Repo.repoDirName in os.listdir(startPath):
             repoPath = os.path.join(startPath, Repo.repoDirName)
@@ -144,6 +183,7 @@ class Repo:
 
     @staticmethod
     def initRepo(targetDir='.'):
+        '''Create a new repo in `targetDir`. Return the new repo.'''
         try:
             p = os.path.abspath(targetDir)
             p = os.path.join(p, Repo.repoDirName)
@@ -155,6 +195,7 @@ class Repo:
         raise RepoAlreadyExistsError()
 
     def __enter__(self):
+        '''Set the repo to read/write mode.'''
         if self.closed:
             reopen = Repo.loadRepo(startDir=self.abspath)
             reopen.readOnly = False
@@ -163,4 +204,5 @@ class Repo:
         return self
 
     def __exit__(self, *args):
+        '''Close the repo.'''
         self.close()

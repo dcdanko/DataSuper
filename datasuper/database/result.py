@@ -3,13 +3,15 @@ from pyarchy import archy
 
 
 class ResultRecord(BaseRecord):
+    '''Class that keeps track of a result, essentially a set of files.'''
+
     def __init__(self, repo, **kwargs):
         super(ResultRecord, self).__init__(repo, **kwargs)
         try:
             self._previousResults = self.db.asPKs(kwargs['previous_results'])
         except KeyError:
             self._previousResults = []
-        
+
         try:
             self._provenance = kwargs['provenance']
         except KeyError:
@@ -29,8 +31,8 @@ class ResultRecord(BaseRecord):
         # map of identifiers -> primary keys (as a dict)
         self._fileRecords = self.instantiateResultSchema(fileRecs)
 
-        
     def to_dict(self):
+        '''Create a dict that serializes this result.'''
         out = super(ResultRecord, self).to_dict()
         out['previous_results'] = self._previousResults
         out['provenance'] = self._provenance
@@ -39,14 +41,16 @@ class ResultRecord(BaseRecord):
         return out
 
     def files(self):
+        '''Return a list of tuples of (key, file-record).'''
         if type(self._fileRecords) == dict:
             out = {}
             for k, fr in self._fileRecords.items():
                 out[k] = self.db.fileTable.get(fr)
-            return [(k,v) for k,v in out.items()]
+            tups = out.items()
         else:
-            return [(i, el) for i, el in enumerate(self.db.fileTable.getMany(self._fileRecords))]
-    
+            tups = enumerate(self.db.fileTable.getMany(self._fileRecords))
+        return [(k, v) for k, v in tups]
+
     def _validStatus(self):
         fs = self.files()
         if len(fs) == 0:
@@ -61,6 +65,7 @@ class ResultRecord(BaseRecord):
         return True
 
     def resultType(self):
+        '''Return the type of this result.'''
         return self._resultType
 
     def instantiateResultSchema(self, fileRecs):
@@ -79,29 +84,30 @@ class ResultRecord(BaseRecord):
                     assert k in schema
                 return fileRecs
         else:
-            #assert type(fileRecs) in [str,Path
             return fileRecs
 
-
-    
     def __str__(self):
         out = '{}\t{}'.format(self.name, self._resultType)
         return out
 
     def tree(self, raw=False):
-        out = {'label': self.name, 'nodes':[]}
-        try:
-            for key, fr in self.files():
-                out['nodes'].append('{} {}'.format(key, str(fr)))
-        except AttributeError:
-            for fr in self.files():
-                out['nodes'].append( '{}'.format(fr.name))
+        '''Returns a JSONable tree starting at this result.'''
+        out = {'label': self.name, 'nodes': []}
+        for key, fr in self.files():
+            out['nodes'].append('{} {}'.format(key, str(fr)))
         if raw:
             return out
         else:
             return archy(out)
 
     def remove(self, atomic=False):
+        '''Remove this result.
+
+        Rewrite this method. Currently removing the record breaks the
+        db which should not happen. Not clear if removing the record should
+        remove files (if not atomic) but that seems intuitive.
+
+        '''
         if not atomic:
             pk = self.primaryKey
             samples = self.db.sampleTable.getAll()

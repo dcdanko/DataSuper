@@ -4,6 +4,8 @@ from .result import *
 
 
 class SampleRecord(BaseRecord):
+    '''Class that keeps track of a sample, essentially a set of results.'''
+
     def __init__(self, repo, **kwargs):
         super(SampleRecord, self).__init__(repo, **kwargs)
         try:
@@ -18,6 +20,7 @@ class SampleRecord(BaseRecord):
         self.sampleType = self.repo.validateSampleType(kwargs['sample_type'])
 
     def to_dict(self):
+        '''Create a dict that serializes this sample.'''
         out = super(SampleRecord, self).to_dict()
         out['results'] = self._results
         out['sample_type'] = str(self.sampleType)
@@ -32,6 +35,7 @@ class SampleRecord(BaseRecord):
         return True
 
     def addResult(self, result):
+        '''Add a result to this sample. Return this sample.'''
         if issubclass(type(result), BaseRecord):
             result = result.primaryKey
         result = self.db.asPK(result)
@@ -39,15 +43,14 @@ class SampleRecord(BaseRecord):
         return self
 
     def dropResult(self, result):
-        # still requires the sample to be saved!
+        '''Remove a result from this sample but do not commit to disk.'''
         if issubclass(type(result), BaseRecord):
             result = result.primaryKey
         result = self.db.asPK(result)
         self._results.remove(result)
 
-
     def results(self, resultTypes=None):
-
+        '''Return a list of results in this sample.'''
         results = self.db.resultTable.getMany(self._results)
         if resultTypes is not None:
             filtered = []
@@ -58,13 +61,13 @@ class SampleRecord(BaseRecord):
             results = filtered
 
         return results
-            
-    
+
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.sampleType)
         return out
 
     def tree(self, raw=False):
+        '''Returns a JSONable tree starting at this sample.'''
         out = {'label': self.name, 'nodes':[]}
         for res in self.results():
             out['nodes'].append( res.tree(raw=True))

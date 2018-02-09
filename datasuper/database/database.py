@@ -10,6 +10,7 @@ from .sample import *
 
 
 class Database:
+    '''Represents a database that stores tables of records.'''
     dbName = 'datasuper.tinydb.json'
     fileTblName = 'file_record_table'
     resultTblName = 'result_record_table'
@@ -65,16 +66,21 @@ class Database:
             self.nameToPKTable[rec.name] = rec.primaryKey
 
     def pkNotUsed(self, primaryKey):
-        # check that the primary key has not already been used
+        '''Return True if `primaryKey` has not been used, else False.'''
         self._buildPKNameTables()
         return not (primaryKey in self.pkToNameTable)
 
     def nameNotUsed(self, name):
-        # check that the primary key has not already been used
+        '''Return True if `name` has not been used, else False.'''
         self._buildPKNameTables()
         return not (name in self.nameToPKTable)
 
     def asPK(self, name):
+        '''Return a primary key corresponding to name. 
+
+        If `name` is actually a primary key return `name`.
+
+        '''
         self._buildPKNameTables()
         try:
             pk = self.nameToPKTable[name]
@@ -89,14 +95,15 @@ class Database:
         return pk
 
     def asPKs(self, names):
-        # convert a list of names into a set of pks
+        '''Return a set of primary keys corresponding to `names`.'''
         self._buildPKNameTables()
         pks = set()
         for name in names:
             pks.add(self.asPK(name))
         return pks
 
-    def asName(self, pks):
+    def asName(self, pk):
+        '''Return a (human readable) name corresponding to `pk`.'''
         self._buildPKNameTables()
         try:
             name = self.pkToNameTable[pk]
@@ -108,7 +115,7 @@ class Database:
         return name
 
     def asNames(self, pks):
-        # convert a list of pks into a list of names
+        '''Return a list of names corresponding to `pks`.'''
         self._buildPKNameTables()
         names = []
         for pk in pks:
@@ -116,6 +123,7 @@ class Database:
         return names
 
     def getTable(self, recType):
+        '''Return the table appropriate for `recType`.'''
         if recType == FileRecord:
             return self.fileTable
         elif recType == ResultRecord:
@@ -126,10 +134,12 @@ class Database:
             return self.sampleGroupTable
 
     def close(self):
+        '''Close the database.'''
         self.tdb.close()
 
     @staticmethod
     def loadDatabase(repo, path, readOnly):
+        '''Load the database from a repo directory.'''
         dbPath = os.path.join(repo.abspath, Database.dbName)
         tinydbDB = TinyDB(dbPath, storage=CachingMiddleware(JSONStorage))
         return Database(repo, readOnly, tinydbDB)

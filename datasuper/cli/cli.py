@@ -4,6 +4,7 @@ from datasuper.database import *
 import sys
 from json import dumps as jdumps
 
+
 @click.group()
 def main():
     pass
@@ -320,8 +321,9 @@ def detailSample(name):
             print('Could not find name for {}'.format(resPK))
 
 
-
 ###############################################################################
+
+
 @main.group()
 def repair():
     pass
@@ -373,7 +375,6 @@ def repairSamples():
                     print('Failed to save sample {}'.format(rawRec['name']))
             except InvalidRecordStateError:
                 print('Failed to fix sample {}'.format(rawRec['name']))
-
 
 
 ###############################################################################

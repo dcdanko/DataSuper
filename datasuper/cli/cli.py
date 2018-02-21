@@ -11,6 +11,7 @@ def main():
 
 @main.command()
 def init():
+    '''Create a repo in the current directory.'''
     try:
         Repo.initRepo()
     except RepoAlreadyExistsError:
@@ -20,6 +21,7 @@ def init():
 
 
 def tableStatus(tbl, name):
+    '''Check if records in a table are valid and print a report to stdout.'''
     ngrps = tbl.size()
     grps = tbl.getAllLazily()
     sys.stdout.write('\n{} {}... '.format(ngrps, name))
@@ -40,6 +42,7 @@ def tableStatus(tbl, name):
 
 @main.command()
 def status():
+    '''Check if all records are valid and print a report to stdout.'''
     repo = Repo.loadRepo()
     sys.stdout.write('Checking status')
     tableStatus(repo.db.sampleGroupTable, 'sample groups')
@@ -61,6 +64,7 @@ def add():
 @click.argument('name', nargs=1)
 @click.argument('samples', nargs=-1)
 def addGroup(name, samples):
+    '''Add a sample group to the repo.'''
     with Repo.loadRepo() as repo:
         sg = SampleGroupRecord(repo, name=name)
         sg.save()
@@ -70,6 +74,7 @@ def addGroup(name, samples):
 @click.argument('name', nargs=1)
 @click.argument('sample_type', default=None, nargs=1)
 def addSample(name, sample_type):
+    '''Add a sample to the repo.'''
     with Repo.loadRepo() as repo:
         sample = SampleRecord(repo, name=name, sample_type=sample_type)
         sample.save()
@@ -80,6 +85,7 @@ def addSample(name, sample_type):
 @click.argument('filepath', nargs=1)
 @click.argument('file_type', default=None, nargs=1)
 def addFile(name, filepath, file_type):
+    '''Add a file record to the repo.'''
     with Repo.loadRepo() as repo:
         sample = FileRecord(repo,
                             name=name,
@@ -93,6 +99,7 @@ def addFile(name, filepath, file_type):
 @click.argument('result_type', nargs=1)
 @click.argument('fields', nargs=-1)
 def addResult(name, result_type, fields):
+    '''Add a result records to the repo.'''
     if ':' in fields[0]:
         fileRecs = {}
         for field in fields:
@@ -113,6 +120,7 @@ def addResult(name, result_type, fields):
 @click.argument('group_name', nargs=1)
 @click.argument('sample_names', nargs=-1)
 def addSamplesToGroup(group_name, sample_names):
+    '''Add sample records to a particular group.'''
     with Repo.loadRepo() as repo:
         group = repo.db.sampleGroupTable.get(group_name)
         for sampleName in sample_names:
@@ -124,6 +132,7 @@ def addSamplesToGroup(group_name, sample_names):
 @click.argument('group_name', nargs=1)
 @click.argument('result_names', nargs=-1)
 def addResultsToGroup(group_name, result_names):
+    '''Add result records to a particular group.'''
     with Repo.loadRepo() as repo:
         group = repo.db.sampleGroupTable.get(group_name)
         for resultName in result_names:
@@ -135,6 +144,7 @@ def addResultsToGroup(group_name, result_names):
 @click.argument('sample_name', nargs=1)
 @click.argument('result_names', nargs=-1)
 def addResultsToSample(sample_name, result_names):
+    '''Add result records to a particular sample.'''
     with Repo.loadRepo() as repo:
         sample = repo.db.sampleTable.get(sample_name)
         for resultName in result_names:
@@ -152,6 +162,7 @@ def type():
 @type.command(name='sample')
 @click.argument('type_names', nargs=-1)
 def addSampleTypes(type_names):
+    '''Add several sample types to the repo.'''
     with Repo.loadRepo() as repo:
         for typeName in type_names:
             repo.addSampleType(typeName)
@@ -160,6 +171,7 @@ def addSampleTypes(type_names):
 @type.command(name='file')
 @click.argument('type_names', nargs=-1)
 def addFileTypes(type_names):
+    '''Add several file types to the repo.'''
     with Repo.loadRepo() as repo:
         for typeName in type_names:
             repo.addFileType(typeName)
@@ -169,6 +181,7 @@ def addFileTypes(type_names):
 @click.argument('type_name', nargs=1)
 @click.argument('fields', nargs=-1)
 def addResultSchema(type_name, fields):
+    '''Add a result type and schema to the repo.'''
     processedFields = []
     fieldList = True
     if ':' in fields[0]:
@@ -193,6 +206,7 @@ def view():
 
 @view.command(name='groups')
 def viewGroups():
+    '''Print a list of all sample groups to the screen.'''
     repo = Repo.loadRepo()
     for sg in repo.db.sampleGroupTable.getAll():
         print(sg.name)
@@ -200,6 +214,7 @@ def viewGroups():
 
 @view.command(name='samples')
 def viewSamples():
+    '''Print a list of all samples to the screen.'''
     repo = Repo.loadRepo()
     for sample in repo.db.sampleTable.getAll():
         print(sample)
@@ -207,6 +222,7 @@ def viewSamples():
 
 @view.command(name='files')
 def viewFiles():
+    '''Print a list of all file records to the screen.'''
     repo = Repo.loadRepo()
     for fileRec in repo.db.fileTable.getAll():
         print(fileRec)
@@ -214,6 +230,7 @@ def viewFiles():
 
 @view.command(name='results')
 def viewResults():
+    '''Print a list of all results to the screen.'''
     repo = Repo.loadRepo()
     for result in repo.db.resultTable.getAll():
         print(result)
@@ -221,6 +238,7 @@ def viewResults():
 
 @view.command(name='sample-types')
 def viewSampleTypes():
+    '''Print a list of all sample types to the screen.'''
     repo = Repo.loadRepo()
     for st in repo.getSampleTypes():
         print(st)
@@ -228,6 +246,7 @@ def viewSampleTypes():
 
 @view.command(name='file-types')
 def viewFileTypes():
+    '''Print a list of all file types to the screen.'''
     print('name\text')
     repo = Repo.loadRepo()
     for ft in repo.getFileTypes():
@@ -236,6 +255,7 @@ def viewFileTypes():
 
 @view.command(name='result-types')
 def viewResultSchema():
+    '''Print a list of all result types and schemas to the screen.'''
     repo = Repo.loadRepo()
     for rt in repo.getResultTypes():
         schema = repo.getResultSchema(rt)
@@ -258,6 +278,7 @@ def tree():
 
 @tree.command(name='groups')
 def treeGroups():
+    '''Print a tree diagram of all records starting at the group level.'''
     repo = Repo.loadRepo()
     for sg in repo.db.sampleGroupTable.getAll():
         sys.stdout.write(sg.tree())
@@ -265,6 +286,7 @@ def treeGroups():
 
 @tree.command(name='samples')
 def treeSamples():
+    '''Print a tree diagram of records starting at the sample level.'''
     repo = Repo.loadRepo()
     for s in repo.db.sampleTable.getAll():
         sys.stdout.write(s.tree())
@@ -365,6 +387,7 @@ def remove():
 @remove.command(name='invalids')
 @click.option('--confirmed/--not-confirmed', default=False)
 def removeInvalids(confirmed):
+    '''Remove all records that are not valid. Won't run if not confirmed.'''
     with Repo.loadRepo() as repo:
         toRemove = []
         toRemove += repo.db.sampleGroupTable.getInvalids()
@@ -380,9 +403,11 @@ def removeInvalids(confirmed):
         repo.db.resultTable.removeInvalids()
         repo.db.fileTable.removeInvalids()
 
+
 @remove.command(name='results')
 @click.argument('result_names', nargs=-1)
 def removeResults(result_names):
+    '''Remove the given results.'''
     with Repo.loadRepo() as repo:
         for result in repo.db.resultTable.getMany(result_names):
             result.remove()
@@ -390,7 +415,8 @@ def removeResults(result_names):
 
 @remove.command(name='files')
 @click.argument('file_names', nargs=-1)
-def removeResults(file_names):
+def removeFiles(file_names):
+    '''Remove the given files.'''
     with Repo.loadRepo() as repo:
         for fileRec in repo.db.fileTable.getMany(file_names):
             fileRec.remove(atomic=True)

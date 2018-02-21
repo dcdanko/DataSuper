@@ -1,13 +1,14 @@
 from .base_record import *
 import hashlib
 
-class FileRecord( BaseRecord):
-    
+class FileRecord(BaseRecord):
+    '''Class that keeps track of an actual file.'''
+
     def __init__(self, repo, **kwargs):
         super(FileRecord, self).__init__(repo, **kwargs)
 
         self._filepath = self.repo.pathFromRepo(kwargs['filepath'])
-        self.fileType = self.repo.validateFileType( kwargs['file_type'])        
+        self.fileType = self.repo.validateFileType(kwargs['file_type'])
         try:
             self.checksum = kwargs['checksum']
         except KeyError:
@@ -15,6 +16,7 @@ class FileRecord( BaseRecord):
         self.cachedValid = None
 
     def to_dict(self):
+        '''Create a dict that serializes this file record.'''
         out = super(FileRecord, self).to_dict()
         out['filepath'] = self._filepath
         out['checksum'] = self.checksum
@@ -22,11 +24,13 @@ class FileRecord( BaseRecord):
         return out
 
     def filepath(self):
+        '''Return the abspath of the actual file.'''
         return self.repo.toAbspath(self._filepath)
-    
+
     def _currentChecksum(self):
-        return hashlib.sha256(open(self.filepath(), 'rb').read(4096)).hexdigest()
-    
+        bits = open(self.filepath(), 'rb').read(4096)
+        return hashlib.sha256(bits).hexdigest()
+
     def _validStatus(self):
         if self.cachedValid is None:
             try:
@@ -34,12 +38,13 @@ class FileRecord( BaseRecord):
             except FileNotFoundError:
                 self.cachedValid = False
         return self.cachedValid
-    
+
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.filepath())
         return out
 
     def remove(self, atomic=False):
+        '''Remove the file record but don't touch anything else.'''
         if not atomic:
             raise NotImplementedError()
         self.atomicDelete()

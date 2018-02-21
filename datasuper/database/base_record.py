@@ -2,6 +2,19 @@ from .database_exceptions import *
 
 
 class BaseRecord:
+    '''Abstract class providing functions common to all records.
+
+    Attributes:
+        repo (datasuper.Repo): The repo that contains this record.
+        db (datasuper.Database): The database that contains this record.
+        dbTable (datasuper.DatabaseTable): The table that contains this record.
+        name (str): The human readable name of this record.
+        primaryKey (str): The invariant machine readable name of this record.
+        metadata (dict): A key value map storing metadata. Must be able to
+            convert to JSON.
+
+    '''
+
     def __init__(self, repo, **kwargs):
         self.repo = repo
         self.db = repo.db
@@ -17,21 +30,30 @@ class BaseRecord:
             self.metadata = {}
 
     def exists(self):
+        '''Return True if this record has been saved at some point.'''
         return self.dbTable.exists(self.primaryKey)
 
     def nameExists(self):
+        '''Return True if the current name exists in the table.'''
         return self.dbTable.exists(self.name)
 
     def save(self, modify=False):
+        '''Save this record to the table and return the record.
+
+        Args:
+            modify (:obj:`bool`, optional): Flag to modify this record
+                if it already exists. Defaults to False.
+
+        '''
         if not self.validStatus():
-            raise InvalidRecordStateError('Invalid status on save')
+            raise InvalidRecordStateError()
 
         pkExists = self.exists()
         nameExists = self.nameExists()
         if (pkExists or nameExists) and not modify:
             raise RecordExistsError()
         elif pkExists and modify:
-            rec = self.dbTable.getRaw(self.primaryKey)
+            rec = self.dbTable.get(self.primaryKey).to_dict()
             rec = self._mergeDicts(rec)
             self.dbTable.update(self.primaryKey, rec)
             return self.dbTable.get(self.primaryKey)
@@ -56,29 +78,44 @@ class BaseRecord:
         return rec
 
     def rename(self, newName):
+        '''Change the human readbale name of this record. Return self.'''
         self.dbTable.rename(self.primaryKey, newName)
         self.name = newName
+        return self
 
     def remove(self):
         raise NotImplementedError()
 
     def atomicDelete(self):
+        '''Remove just this record.'''
         self.dbTable.remove(self.primaryKey)
 
     def raw(self):
+        '''Return the dict corresponding to this record.
+
+        This function is different than `to_dict()`. It returns
+        the dict that is actually stored in the table.
+
+        '''
         return self.dbTable.getRaw(self.primaryKey)
 
     def validStatus(self):
+        '''Return True if this record is valid, else False.'''
         try:
             return self._validStatus()
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
 
     def _validStatus(self):
         raise NotImplementedError()
 
     def to_dict(self):
+        '''Create a dict that serializes this record.
+
+        This function is different than `raw()`. It returns
+        the dict that corresponds to this records current state.
+
+        '''
         out = {
             'primary_key': self.primaryKey,
             'name': self.name,

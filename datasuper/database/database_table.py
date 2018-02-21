@@ -4,11 +4,8 @@ import string
 from .database_exceptions import *
 
 
-class RepoReadOnlyError(Exception):
-    pass
-
-
 class DatabaseTable:
+    '''Stores and manipulates database records of a given type.'''
 
     def __init__(self, db, readOnly, typeStored, tinydbTbl):
         self.repo = db.repo
@@ -17,6 +14,7 @@ class DatabaseTable:
         self.typeStored = typeStored
 
     def _newPrimaryKey(self):
+        '''Return a new random string for use as a primary key.'''
         N = 20
         chars = string.ascii_uppercase + string.digits
         pk = [rchoice(chars) for _ in range(N)]
@@ -24,6 +22,7 @@ class DatabaseTable:
         return pk
 
     def rename(self, primaryKey, newName):
+        '''Change name of `primaryKey` to `newName` then return the record.'''
         if self.readOnly:
             raise RepoReadOnlyError()
         rawRec = self.getRaw(primaryKey)
@@ -38,47 +37,51 @@ class DatabaseTable:
         return self.get(primaryKey)
 
     def exists(self, primaryKey):
+        '''Return True if `primaryKey` is in the table, else False.'''
         try:
             primaryKey = self.db.asPK(primaryKey)
         except KeyError:
             return False
-        return self.tbl.get(where('primary_key') == primaryKey) is not None
+        rec = self.tbl.get(where('primary_key') == primaryKey)
+        return rec is not None
 
     def getRaw(self, primaryKey):
+        '''Return the dict backing `primaryKey`'''
         primaryKey = self.db.asPK(primaryKey)
         return self.tbl.get(where('primary_key') == primaryKey)
 
     def get(self, primaryKey):
+        '''Return the record corresponding to `primaryKey`'''
         primaryKey = self.db.asPK(primaryKey)
         rawRec = self.tbl.get(where('primary_key') == primaryKey)
         rec = self.typeStored(self.repo, **rawRec)
         return rec
 
     def getMany(self, primaryKeys):
+        '''Return a list of records corresponding to `priamryKeys`.'''
         primaryKeys = self.db.asPKs(primaryKeys)
         recs = [self.get(pk) for pk in primaryKeys]
         return recs
 
     def size(self):
+        '''Return the number of records in the table.'''
         return len(self.tbl.all())
 
     def getAll(self):
+        '''Return a list of all records in the table.'''
         rawRecs = self.tbl.all()
         recs = [self.typeStored(self.repo, **rawRec) for rawRec in rawRecs]
         return recs
 
-    def getAllRaw(self):
-        rawRecs = self.tbl.all()
-        recs = [rawRec for rawRec in rawRecs]
-        return recs
-
     def getAllLazily(self):
+        '''Return a generator of tuples of name and a record loader.'''
         rawRecs = self.tbl.all()
         recs = ((rawRec['name'], lambda: self.typeStored(self.repo, **rawRec))
                 for rawRec in rawRecs)
         return recs
 
     def insert(self, newRecord):
+        '''Add a record to the table. Return the new record.'''
         if self.repo.readOnly:
             raise RepoReadOnlyError()
         assert newRecord['primary_key'] is None  # idiot check myself
@@ -90,13 +93,13 @@ class DatabaseTable:
             raise RecordExistsError(newRecord)
 
         self.tbl.insert(newRecord)
-
         self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']
         self.db.pkToNameTable[newRecord['primary_key']] = newRecord['name']
 
         return self.get(newRecord['primary_key'])
 
     def update(self, primaryKey, updatedRecord):
+        '''Change `primaryKey` to updatedRecord. Return the new record.'''
         primaryKey = self.db.asPK(primaryKey)
         if self.repo.readOnly:
             raise RepoReadOnlyError
@@ -106,6 +109,7 @@ class DatabaseTable:
         return self.get(primaryKey)
 
     def remove(self, primaryKey):
+        '''Remove `primaryKey` from the table.'''
         primaryKey = self.db.asPK(primaryKey)
         if self.repo.readOnly:
             raise RepoReadOnlyError
@@ -113,6 +117,7 @@ class DatabaseTable:
         self.tbl.remove(where('primary_key') == primaryKey)
 
     def getInvalids(self):
+        '''Return a list of primary keys for records that cannot be built.'''
         out = []
         for rawRec in self.tbl.all():
             try:
@@ -122,6 +127,7 @@ class DatabaseTable:
         return out
 
     def removeInvalids(self):
+        '''Remove all records that cannot be built.'''
         if self.repo.readOnly:
             raise RepoReadOnlyError
         toRemove = []

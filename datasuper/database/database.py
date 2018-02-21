@@ -40,7 +40,7 @@ class Database:
         self.sampleGroupTable = DatabaseTable(self,
                                               self.readOnly,
                                               SampleGroupRecord,
-                                              self.tdb.table( Database.sampleGroupTblName))
+                                              self.tdb.table(Database.sampleGroupTblName))
 
     def _buildPKNameTables(self):
         if self.pkToNameTable is not None:
@@ -48,21 +48,21 @@ class Database:
         self.pkToNameTable = {}
         self.nameToPKTable = {}
 
-        for rec in self.fileTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        for rec in self.fileTable.getAllRaw():
+            self.pkToNameTable[rec['primary_key']] = rec['name']
+            self.nameToPKTable[rec['name']] = rec['primary_key']
 
-        for rec in self.resultTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        for rec in self.resultTable.getAllRaw():
+            self.pkToNameTable[rec['primary_key']] = rec['name']
+            self.nameToPKTable[rec['name']] = rec['primary_key']
 
-        for rec in self.sampleTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        for rec in self.sampleTable.getAllRaw():
+            self.pkToNameTable[rec['primary_key']] = rec['name']
+            self.nameToPKTable[rec['name']] = rec['primary_key']
 
-        for rec in self.sampleGroupTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        for rec in self.sampleGroupTable.getAllRaw():
+            self.pkToNameTable[rec['primary_key']] = rec['name']
+            self.nameToPKTable[rec['name']] = rec['primary_key']
 
     def pkNotUsed(self, primaryKey):
         # check that the primary key has not already been used
@@ -96,7 +96,7 @@ class Database:
             pks.add(self.asPK(name))
         return pks
 
-    def asName(self, pks):
+    def asName(self, pk):
         self._buildPKNameTables()
         try:
             name = self.pkToNameTable[pk]

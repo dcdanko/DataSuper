@@ -4,21 +4,22 @@ from .result import *
 from .file_record import *
 from pyarchy import archy
 
-class SampleGroupRecord( BaseRecord):
+
+class SampleGroupRecord(BaseRecord):
     def __init__(self, repo, **kwargs):
         super(SampleGroupRecord, self).__init__(repo, **kwargs)
         try:
-            self._subgroups = self.db.asPKs(kwargs['subgroups']) # n.b. these are keys not objects
+            self._subgroups = self.db.asPKs(kwargs['subgroups'])  # n.b. these are keys not objects
         except KeyError:
             self._subgroups = []
 
         try:
-            self._directSamples = self.db.asPKs(kwargs['direct_samples']) # n.b. these are keys not objects
+            self._directSamples = self.db.asPKs(kwargs['direct_samples'])  # n.b. these are keys not objects
         except KeyError:
             self._directSamples = []
 
         try:
-            self._directResults = self.db.asPKs(kwargs['direct_results']) # n.b. these are keys not objects
+            self._directResults = self.db.asPKs(kwargs['direct_results'])  # n.b. these are keys not objects
         except KeyError:
             self._directResults = []
             
@@ -41,7 +42,7 @@ class SampleGroupRecord( BaseRecord):
             if not result.validStatus():
                 return False
         return True
-            
+
     def to_dict(self):
         out = super(SampleGroupRecord, self).to_dict()
         out['subgroups'] = self._subgroups
@@ -61,10 +62,12 @@ class SampleGroupRecord( BaseRecord):
         result = self.db.asPK( result)
         self._directResults.add( result)
 
-        
     def directSamples(self):
-        return self.db.sampleTable.getMany( self._directSamples)
-        
+        return self.db.sampleTable.getMany(self._directSamples)
+
+    def samples(self):
+        return self.allSamples()
+
     def allSamples(self):
         for sample in self.directSamples():
             yield sample

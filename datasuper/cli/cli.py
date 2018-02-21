@@ -2,7 +2,7 @@ import click
 from datasuper import *
 from datasuper.database import *
 import sys
-
+from json import dumps as jdumps
 
 @click.group()
 def main():
@@ -268,6 +268,90 @@ def treeSamples():
     repo = Repo.loadRepo()
     for s in repo.db.sampleTable.getAll():
         sys.stdout.write(s.tree())
+
+
+###############################################################################
+
+
+@main.group()
+def detail():
+    pass
+
+
+@detail.command(name='sample')
+@click.argument('name')
+def detailSample(name):
+    repo = Repo.loadRepo()
+    try:
+        sample = repo.db.sampleTable.get(name)
+        print(sample)
+    except InvalidRecordStateError:
+        print('Failed to build sample.')
+    rawSample = repo.db.sampleTable.getRaw(name)
+    print(jdumps(rawSample, sort_keys=True, indent=4))
+
+    for resPK in rawSample['results']:
+        try:
+            resName = repo.db.asName(resPK)
+            print('{} {}'.format(resPK, resName))
+        except KeyError:
+            print('Could not find name for {}'.format(resPK))
+
+
+
+###############################################################################
+@main.group()
+def repair():
+    pass
+
+
+@repair.command(name='samples')
+def repairSamples():
+    '''
+    Repairs sample records by removing links to 'bad' results
+
+    'bad' results are results that either do not exist or throw
+    an InvalidRecordStateError
+
+    Does not remove any result records, just delinks them from
+    samples
+
+    Checks all samples by default
+    '''
+    with Repo.loadRepo() as repo:
+        for rawRec in repo.db.sampleTable.getAllRaw():
+            keyExists = []
+            print(rawRec['results'])
+            for rawResultPK in rawRec['results']:
+                try:
+                    resultPK = repo.db.asPK(rawResultPK)
+                    keyExists.append(resultPK)
+                except KeyError:
+                    pass
+            keyIsGood = []
+            print(keyExists)
+            for resultPK in keyExists:
+                try:
+                    res = repo.db.resultTable.get(resultPK)
+                    if res.validStatus():
+                        keyIsGood.append(resultPK)
+                except InvalidRecordStateError:
+                    pass
+            print(keyIsGood)
+            if len(rawRec['results']) == len(keyIsGood):
+                print('No change for sample {}'.format(rawRec['name']))
+                continue
+            rawRec['results'] = keyIsGood
+            try:
+                samp = repo.db.sampleTable.typeStored(repo, **rawRec)
+                try:
+                    samp.save(modify=True)
+                    print('Fixed sample {}'.format(samp.name))
+                except InvalidRecordStateError:
+                    print('Failed to save sample {}'.format(rawRec['name']))
+            except InvalidRecordStateError:
+                print('Failed to fix sample {}'.format(rawRec['name']))
+
 
 
 ###############################################################################

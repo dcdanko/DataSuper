@@ -45,9 +45,7 @@ class SampleRecord(BaseRecord):
         result = self.db.asPK(result)
         self._results.remove(result)
 
-
     def results(self, resultTypes=None):
-
         results = self.db.resultTable.getMany(self._results)
         if resultTypes is not None:
             filtered = []
@@ -58,16 +56,15 @@ class SampleRecord(BaseRecord):
             results = filtered
 
         return results
-            
-    
+
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.sampleType)
         return out
 
     def tree(self, raw=False):
-        out = {'label': self.name, 'nodes':[]}
+        out = {'label': self.name, 'nodes': []}
         for res in self.results():
-            out['nodes'].append( res.tree(raw=True))
+            out['nodes'].append(res.tree(raw=True))
         if raw:
             return out
         else:

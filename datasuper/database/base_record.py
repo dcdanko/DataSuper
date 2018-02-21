@@ -1,5 +1,6 @@
 from .database_exceptions import *
 
+
 class BaseRecord:
     def __init__(self, repo, **kwargs):
         self.repo = repo
@@ -23,14 +24,14 @@ class BaseRecord:
 
     def save(self, modify=False):
         if not self.validStatus():
-            raise InvalidRecordStateError()
+            raise InvalidRecordStateError('Invalid status on save')
 
         pkExists = self.exists()
         nameExists = self.nameExists()
         if (pkExists or nameExists) and not modify:
             raise RecordExistsError()
         elif pkExists and modify:
-            rec = self.dbTable.get(self.primaryKey).to_dict()
+            rec = self.dbTable.getRaw(self.primaryKey)
             rec = self._mergeDicts(rec)
             self.dbTable.update(self.primaryKey, rec)
             return self.dbTable.get(self.primaryKey)
@@ -44,7 +45,6 @@ class BaseRecord:
             self.primaryKey = savedSelf.primaryKey
             return savedSelf
 
-            
     def _mergeDicts(self, rec):
         mydict = self.to_dict()
         for k, v in mydict.items():
@@ -56,35 +56,32 @@ class BaseRecord:
         return rec
 
     def rename(self, newName):
-        self.dbTable.rename( self.primaryKey, newName)
+        self.dbTable.rename(self.primaryKey, newName)
         self.name = newName
-
 
     def remove(self):
         raise NotImplementedError()
-        
+
     def atomicDelete(self):
         self.dbTable.remove(self.primaryKey)
 
     def raw(self):
-        return self.dbTable.getRaw( self.primaryKey)
+        return self.dbTable.getRaw(self.primaryKey)
 
     def validStatus(self):
         try:
             return self._validStatus()
-        except Exception:
+        except Exception as e:
+            print(e)
             return False
 
     def _validStatus(self):
         raise NotImplementedError()
 
-    
     def to_dict(self):
         out = {
-            'primary_key' : self.primaryKey,
+            'primary_key': self.primaryKey,
             'name': self.name,
             'metadata': str(self.metadata)
-            }
+        }
         return out
-    
-    

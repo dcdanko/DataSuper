@@ -148,6 +148,10 @@ class Repo:
         abspath = os.path.join(pathToRepo, repopath)
         return abspath
 
+    def checkStatus(self):
+        out = self.database.checkStatus()
+        return out
+
     @staticmethod
     def loadRepo(startDir='.', recurse=True):
         '''Build and return the repo initialized in or above startRepo.

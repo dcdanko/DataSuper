@@ -138,3 +138,17 @@ class DatabaseTable:
                 toRemove.append(rawRec['primary_key'])
         for pk in toRemove:
             self.tbl.remove(where('primary_key') == pk)
+
+    def checkStatus(self):
+        '''Return a map of record names to valid status.'''
+        out = {}
+        for name, recfunc in self.getAllLazily():
+            try:
+                rec = recfunc()
+            except InvalidRecordStateError:
+                out[name] = False
+                continue
+            if not rec.validStatus():
+                out[name] = False
+            out[name] = True
+        return out

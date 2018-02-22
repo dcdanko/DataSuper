@@ -137,6 +137,15 @@ class Database:
         '''Close the database.'''
         self.tdb.close()
 
+    def checkStatus(self):
+        out = {
+            'sample_groups': self.sampleGroupTable.checkStatus(),
+            'samples': self.sampleTable.checkStatus(),
+            'results': self.resultTable.checkStatus(),
+            'file_records': self.fileTable.checkStatus()
+        }
+        return out
+
     @staticmethod
     def loadDatabase(repo, path, readOnly):
         '''Load the database from a repo directory.'''

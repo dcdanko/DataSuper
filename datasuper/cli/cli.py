@@ -21,20 +21,13 @@ def init():
 ###############################################################################
 
 
-def tableStatus(tbl, name):
+def tableStatus(tbl, tblName):
     '''Check if records in a table are valid and print a report to stdout.'''
     ngrps = tbl.size()
-    grps = tbl.getAllLazily()
-    sys.stdout.write('\n{} {}... '.format(ngrps, name))
+    sys.stdout.write('\n{} {}... '.format(ngrps, tblName))
     allGood = True
-    for name, grp in grps:
-        try:
-            grp = grp()
-        except InvalidRecordStateError:
-            allGood = False
-            sys.stdout.write('\n - {} failed'.format(name))
-            continue
-        if not grp.validStatus():
+    for name, status in tbl.checkStatus().items():
+        if not status:
             allGood = False
             sys.stdout.write('\n - {} failed'.format(name))
     if allGood:

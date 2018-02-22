@@ -149,7 +149,7 @@ class Repo:
         return abspath
 
     def checkStatus(self):
-        out = self.database.checkStatus()
+        out = self.db.checkStatus()
         return out
 
     @staticmethod

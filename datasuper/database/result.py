@@ -81,7 +81,8 @@ class ResultRecord(BaseRecord):
                 return {k: None for k in schema.keys()}
             else:
                 for k, v in fileRecs.items():
-                    assert k in schema
+                    msg = 'key {} not found in schema type {}'.format(k, self.resultType())
+                    assert k in schema, msg
                 return fileRecs
         else:
             return fileRecs

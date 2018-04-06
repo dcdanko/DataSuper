@@ -68,7 +68,7 @@ class ResultRecord(BaseRecord):
         '''Return the type of this result.'''
         return self._resultType
 
-    def instantiateResultSchema(self, fileRecs):
+    def instantiateResultSchema(self, fileRecs, aggressive=False):
         schema = self.repo.getResultSchema(self.resultType())
         if type(schema) == list:
             if fileRecs is None:
@@ -80,10 +80,17 @@ class ResultRecord(BaseRecord):
             if fileRecs is None:
                 return {k: None for k in schema.keys()}
             else:
+                fileRecsOut = {}
                 for k, v in fileRecs.items():
-                    msg = 'key {} not found in schema type {}'.format(k, self.resultType())
-                    assert k in schema, msg
-                return fileRecs
+                    if aggressive:
+                        msg = 'key {} not found in schema type {}\n'
+                        msg = msg.format(k, self.resultType())
+                        msg += 'This can occur when a schema is updated.'
+                        assert k in schema, msg
+                        fileRecsOut[k] = v
+                    elif k in schema:
+                        fileRecsOut[k] = v
+                return fileRecsOut
         else:
             return fileRecs
 

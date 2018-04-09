@@ -74,7 +74,11 @@ class ResultRecord(BaseRecord):
             if fileRecs is None:
                 return [None for _ in schema]
             else:
-                assert len(fileRecs) == len(schema), 'Could not build schema for {}'.format(self.resultType())
+                msg = ('Could not build schema for result type {}.\n'
+                       'Schema:\n{}\n'
+                       'File Record:\n{}\n')
+                msg = msg.format(self.resultType(), schema, fileRecs)
+                assert len(fileRecs) == len(schema), msg
                 return fileRecs
         elif type(schema) == dict:
             if fileRecs is None:

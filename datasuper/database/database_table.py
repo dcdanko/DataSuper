@@ -124,6 +124,8 @@ class DatabaseTable:
                 self.typeStored(self.repo, **rawRec)
             except InvalidRecordStateError:
                 out.append(rawRec['primary_key'])
+            except SchemaMismatchError:
+                out.append(rawRec['primary_key'])
         return out
 
     def removeInvalids(self):

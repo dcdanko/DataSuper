@@ -1,6 +1,6 @@
 from .base_record import *
 from pyarchy import archy
-from datasuper.errors import SchemaMismatchError
+from .database_exceptions import SchemaMismatchError
 
 
 class ResultRecord(BaseRecord):

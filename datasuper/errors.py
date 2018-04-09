@@ -16,9 +16,10 @@ class SchemaMismatchError(Exception):
     pass
 
     @classmethod
-    def raise_with_message(cls, resultType, schema, fileRecs):
+    def raise_with_message(cls, resultType, pk, schema, fileRecs):
         msg = ('Could not build schema for result type {}.\n'
-               'Schema:\n{}\n'
-               'File Record:\n{}\n')
-        msg = msg.format(resultType, schema, fileRecs)
+               '\tPrimary Key: {}\n'
+               '\tSchema:\n{}\n'
+               '\tFile Record:\n{}\n')
+        msg = msg.format(resultType, pk, schema, fileRecs)
         raise cls(msg)

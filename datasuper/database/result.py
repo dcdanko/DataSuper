@@ -76,6 +76,7 @@ class ResultRecord(BaseRecord):
                 return [None for _ in schema]
             elif len(fileRecs) != len(schema):
                 SchemaMismatchError.raise_with_message(self.resultType(),
+                                                       self.primaryKey,
                                                        schema,
                                                        fileRecs)
             return fileRecs

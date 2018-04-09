@@ -1,5 +1,6 @@
 from .base_record import *
 from pyarchy import archy
+from datasuper.errors import SchemaMismatchError
 
 
 class ResultRecord(BaseRecord):
@@ -73,13 +74,11 @@ class ResultRecord(BaseRecord):
         if type(schema) == list:
             if fileRecs is None:
                 return [None for _ in schema]
-            else:
-                msg = ('Could not build schema for result type {}.\n'
-                       'Schema:\n{}\n'
-                       'File Record:\n{}\n')
-                msg = msg.format(self.resultType(), schema, fileRecs)
-                assert len(fileRecs) == len(schema), msg
-                return fileRecs
+            elif len(fileRecs) != len(schema):
+                SchemaMismatchError.raise_With_message(self.resultType(),
+                                                       schema,
+                                                       fileRecs)
+            return fileRecs
         elif type(schema) == dict:
             if fileRecs is None:
                 return {k: None for k in schema.keys()}

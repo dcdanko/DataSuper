@@ -93,10 +93,11 @@ class Repo:
         except KeyError:
             raise TypeNotFoundError(fileType)
 
-    def addResultSchema(self, resultType, resultSchema):
+    def addResultSchema(self, resultType, resultSchema, modify=False):
         '''Set a resultSchema for resultType.'''
         if self._notReadOnly():
-            self.resultSchema[resultType] = resultSchema
+            if modify or (resultType not in self.resultSchema):
+                self.resultSchema[resultType] = resultSchema
 
     def getResultTypes(self):
         '''Return a list of result types in the repo.'''

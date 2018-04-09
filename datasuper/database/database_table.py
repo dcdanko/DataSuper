@@ -138,6 +138,8 @@ class DatabaseTable:
                 self.typeStored(self.repo, **rawRec)
             except InvalidRecordStateError:
                 toRemove.append(rawRec['primary_key'])
+            except SchemaMismatchError:
+                toRemove.append(rawRec['primary_key'])
         for pk in toRemove:
             self.tbl.remove(where('primary_key') == pk)
 

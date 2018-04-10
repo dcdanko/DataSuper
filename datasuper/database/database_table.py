@@ -154,5 +154,6 @@ class DatabaseTable:
                 continue
             if not rec.validStatus():
                 out[name] = False
-            out[name] = True
+            else:
+                out[name] = True
         return out

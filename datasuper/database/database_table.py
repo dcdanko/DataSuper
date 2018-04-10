@@ -121,11 +121,14 @@ class DatabaseTable:
         out = []
         for rawRec in self.tbl.all():
             try:
-                self.typeStored(self.repo, **rawRec)
+                rec = self.typeStored(self.repo, **rawRec)
+                if not rec.validStatus():
+                    out.append(rawRec['primary_key'])
             except InvalidRecordStateError:
                 out.append(rawRec['primary_key'])
             except SchemaMismatchError:
                 out.append(rawRec['primary_key'])
+
         return out
 
     def removeInvalids(self):
@@ -135,11 +138,14 @@ class DatabaseTable:
         toRemove = []
         for rawRec in self.tbl.all():
             try:
-                self.typeStored(self.repo, **rawRec)
+                rec = self.typeStored(self.repo, **rawRec)
+                if not rec.validStatus():
+                    out.append(rawRec['primary_key'])
             except InvalidRecordStateError:
                 toRemove.append(rawRec['primary_key'])
             except SchemaMismatchError:
                 toRemove.append(rawRec['primary_key'])
+
         for pk in toRemove:
             self.tbl.remove(where('primary_key') == pk)
 

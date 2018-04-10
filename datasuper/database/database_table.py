@@ -140,7 +140,7 @@ class DatabaseTable:
             try:
                 rec = self.typeStored(self.repo, **rawRec)
                 if not rec.validStatus():
-                    out.append(rawRec['primary_key'])
+                    toRemove.append(rawRec['primary_key'])
             except InvalidRecordStateError:
                 toRemove.append(rawRec['primary_key'])
             except SchemaMismatchError:

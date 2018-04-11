@@ -8,6 +8,7 @@ class FileRecord(BaseRecord):
         super(FileRecord, self).__init__(repo, **kwargs)
 
         self._filepath = self.repo.pathFromRepo(kwargs['filepath'])
+        print('In_FILE_REC: \n\tPK: {} \n\t_filepath: {} \n\tfilepath: {}'.format(self.primary_key, self._filepath, self.filepath()))
         self.fileType = self.repo.validateFileType(kwargs['file_type'])
         try:
             self.checksum = kwargs['checksum']

@@ -26,23 +26,29 @@ class SampleGroupRecord(BaseRecord):
             self._directResults = []
 
     def _validStatus(self):
+        return self._validStatus()[0]
+
+    def _detailedStatus(self):
         for subgroup in self.subgroups():
             if subgroup.primaryKey == self.primaryKey:
-                return False
+                return False, 'recursive_group'
             if type(subgroup) != SampleGroupRecord:
-                return False
-            if not subgroup.validStatus():
-                return False
+                return False, 'subgroup_is_not_group'
+            subStatus, subStatusMsg = subgroup.detailedStatus()
+            if not subStatus:
+                return False, 'bad_subgroup_status' + ':' + subStatusMsg
         for sample in self.directSamples():
             if type(sample) != SampleRecord:
-                return False
-            if not sample.validStatus():
-                return False
+                return False, 'sample_is_not_sample'
+            sampStatus, sampStatusMsg = sample.detailedStatus()
+            if not sampStatus:
+                return False, 'bad_sample_status' + ':' + sampStatusMsg
         for result in self.directResults():
             if type(result) != ResultRecord:
-                return False
-            if not result.validStatus():
-                return False
+                return False, 'result_is_not_result'
+            resStatus, resMsg = result.detailedStatus()
+            if not resStatus:
+                return False, 'bad_result_status' + ':' + resMsg
         return True
 
     def to_dict(self):

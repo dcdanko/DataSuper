@@ -27,12 +27,16 @@ class SampleRecord(BaseRecord):
         return out
 
     def _validStatus(self):
+        return self.detailedStatus()[0]
+
+    def _detailedStatus(self):
         for res in self.results():
             if type(res) != ResultRecord:
-                return False
-            if not res.validStatus():
-                return False
-        return True
+                return False, 'result_is_not_actually_a_result'
+            resStatus, resStatusMsg = res.detailedStatus()
+            if not resStatus:
+                return False, 'result_has_bad_status' + ':' + resStatusMsg
+        return True, 'all_good'
 
     def addResult(self, result):
         '''Add a result to this sample. Return this sample.'''

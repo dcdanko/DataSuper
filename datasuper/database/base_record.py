@@ -45,8 +45,9 @@ class BaseRecord:
                 if it already exists. Defaults to False.
 
         '''
-        if not self.validStatus():
-            raise InvalidRecordStateError()
+        status, statusMsg = self.detailedStatus()
+        if not status:
+            raise InvalidRecordStateError(statusMsg)
 
         pkExists = self.exists()
         nameExists = self.nameExists()
@@ -107,6 +108,15 @@ class BaseRecord:
             return False
 
     def _validStatus(self):
+        raise NotImplementedError()
+
+    def detailedStatus(self):
+        try:
+            return self._detailedStatus()
+        except Exception:
+            return False, 'error_calling_detailed_status'
+
+    def _detailedStatus(self):
         raise NotImplementedError()
 
     def to_dict(self):

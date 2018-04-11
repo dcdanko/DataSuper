@@ -53,14 +53,18 @@ class ResultRecord(BaseRecord):
         return [(k, v) for k, v in tups]
 
     def _validStatus(self):
+        return self._detailedStatus()[0]
+
+    def _detailedStatus(self):
         fs = self.files()
         if len(fs) == 0:
-            return True
+            return True, 'all_good'
         if len(fs[0]) == 2:
             fs = [el[1] for el in fs]
         for fileRec in fs:
-            if not fileRec.validStatus():
-                return False
+            fileRecStatus, fileRecStatusMsg = fileRec.detailedStatus()
+            if not fileRecStatus:
+                return False, 'bad_file_status' + ':' + fileRecStatusMsg
 
         # TODO: check that it matches schema
         return True

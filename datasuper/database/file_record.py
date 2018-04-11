@@ -14,6 +14,7 @@ class FileRecord(BaseRecord):
         except KeyError:
             self.checksum = self._currentChecksum()
         self.cachedValid = None
+        self.cachedMsg = None
 
     def to_dict(self):
         '''Create a dict that serializes this file record.'''
@@ -32,12 +33,20 @@ class FileRecord(BaseRecord):
         return hashlib.sha256(bits).hexdigest()
 
     def _validStatus(self):
+        return self._detailedStatus()[0]
+
+    def _detailedStatus(self):
+        msg = 'all_good'
         if self.cachedValid is None:
             try:
                 self.cachedValid = self.checksum == self._currentChecksum()
+                if not self.cachedValid:
+                    msg = 'bad_checksum'
+                self.cachedMsg = msg
             except FileNotFoundError:
                 self.cachedValid = False
-        return self.cachedValid
+                self.cachedMsg = 'file_not_found'
+        return self.cachedValid, self.cachedMsg
 
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.filepath())

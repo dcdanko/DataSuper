@@ -21,6 +21,7 @@ class Repo:
     '''
     repoDirName = '.datasuper'
     dbRoot = 'datasuper.tinydb.json'
+    repoMetaRoot = 'repo-metadata.yml'
     resultSchemaRoot = 'result-schemas.yml'
     fileTypesRoot = 'file-types.yml'
     sampleTypesRoot = 'sample-types.yml'
@@ -37,6 +38,9 @@ class Repo:
         self.sampleTable = self.db.sampleTable
         self.sampleGroupTable = self.db.sampleGroupTable
 
+        repoMetaPath = os.path.join(self.abspath, Repo.repoMetaRoot)
+        self.repoMeta = PersistentDict(repoMetaPath)
+
         resultSchemaPath = os.path.join(self.abspath, Repo.resultSchemaRoot)
         self.resultSchema = PersistentDict(resultSchemaPath)
 
@@ -45,6 +49,21 @@ class Repo:
 
         sampleTypesPath = os.path.join(self.abspath, Repo.sampleTypesRoot)
         self.sampleTypes = PersistentSet(sampleTypesPath)
+
+    def repoId(self):
+        '''Return a random id for this repo.
+
+        Generate and save that id if it does not already exist.
+        '''
+        try:
+            return self.repoMeta['repo_id']
+        except KeyError:
+            N = 20
+            chars = string.ascii_uppercase + string.digits
+            repoid = [rchoice(chars) for _ in range(N)]
+            repoid = ''.join(repoid)
+            self.repoMeta['repo_id'] = repoid
+            return self.repoMeta['repo_id']
 
     def close(self):
         '''Close the repo to further write operations.'''

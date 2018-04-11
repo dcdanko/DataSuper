@@ -51,8 +51,10 @@ class BaseRecord:
 
         pkExists = self.exists()
         nameExists = self.nameExists()
-        if (pkExists or nameExists) and not modify:
-            raise RecordExistsError()
+        if pkExists and not modify:
+            raise RecordExistsError('pk_exists:{}'.format(self.primary_key))
+        elif nameExists and not modify:
+            raise RecordExistsError('name_exists:{}'.format(self.name))
         elif pkExists and modify:
             rec = self.dbTable.get(self.primaryKey).to_dict()
             rec = self._mergeDicts(rec)

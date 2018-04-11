@@ -18,6 +18,13 @@ def init():
     except RepoAlreadyExistsError:
         print('Repo already exists.', file=sys.stderr)
 
+
+@main.command()
+def id():
+    '''Get the repo id of the current repo.'''
+    repo = Repo.loadRepo()
+    print(repo.repoId())
+
 ###############################################################################
 
 

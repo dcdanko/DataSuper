@@ -41,11 +41,11 @@ class FileRecord(BaseRecord):
             try:
                 self.cachedValid = self.checksum == self._currentChecksum()
                 if not self.cachedValid:
-                    msg = 'bad_checksum'
+                    msg = 'bad_checksum' + ':' + self.filepath()
                 self.cachedMsg = msg
             except FileNotFoundError:
                 self.cachedValid = False
-                self.cachedMsg = 'file_not_found'
+                self.cachedMsg = 'file_not_found' + ':' + self.filepath()
         return self.cachedValid, self.cachedMsg
 
     def __str__(self):

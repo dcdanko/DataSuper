@@ -49,7 +49,7 @@ class SampleGroupRecord(BaseRecord):
             resStatus, resMsg = result.detailedStatus()
             if not resStatus:
                 return False, 'bad_result_status' + ':' + resMsg
-        return True
+        return True, 'all_good'
 
     def to_dict(self):
         '''Return a dict that serializes this sample.'''

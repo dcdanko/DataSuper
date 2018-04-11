@@ -67,7 +67,7 @@ class ResultRecord(BaseRecord):
                 return False, 'bad_file_status' + ':' + fileRecStatusMsg
 
         # TODO: check that it matches schema
-        return True
+        return True, 'all_good'
 
     def resultType(self):
         '''Return the type of this result.'''

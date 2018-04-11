@@ -75,6 +75,7 @@ def getOrMakeFile(repo, name, filepath, filetype):
         fr = repo.fileTable.get(name)
     except KeyError:
         fr = makeFile(repo, name, filepath, filetype)
+    assert fr.detailedStatus()
     return fr
 
 

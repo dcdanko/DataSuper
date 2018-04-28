@@ -390,12 +390,14 @@ def remove():
 def removeInvalids(confirmed):
     '''Remove all records that are not valid. Won't run if not confirmed.'''
     with Repo.loadRepo() as repo:
-        toRemove = []
-        toRemove += repo.db.sampleGroupTable.getInvalids()
-        toRemove += repo.db.sampleTable.getInvalids()
-        toRemove += repo.db.resultTable.getInvalids()
-        toRemove += repo.db.fileTable.getInvalids()
-        print('Removing {} objects'.format(len(toRemove)))
+        toRemove = {}
+        toRemove['groups'] = repo.db.sampleGroupTable.getInvalids()
+        toRemove['samples'] = repo.db.sampleTable.getInvalids()
+        toRemove['results'] = repo.db.resultTable.getInvalids()
+        toRemove['files'] = repo.db.fileTable.getInvalids()
+        for k, val in toRemove.items():
+            print('Removing {} {} objects'.format(len(val), k),
+                  file=sys.stderr)
         if not confirmed:
             print('Remove not confirmed. Aborting.', file=sys.stderr)
             return

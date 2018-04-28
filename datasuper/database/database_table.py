@@ -73,6 +73,11 @@ class DatabaseTable:
         recs = [self.typeStored(self.repo, **rawRec) for rawRec in rawRecs]
         return recs
 
+    def getAllRaw(self):
+        '''Return a list of all raw records in the table.'''
+        rawRecs = self.tbl.all()
+        return rawRecs
+
     def getAllLazily(self):
         '''Return a generator of tuples of name and a record loader.'''
         rawRecs = self.tbl.all()

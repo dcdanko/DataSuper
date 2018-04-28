@@ -345,7 +345,6 @@ def repairSamples():
     with Repo.loadRepo() as repo:
         for rawRec in repo.db.sampleTable.getAllRaw():
             keyExists = []
-            print(rawRec['results'])
             for rawResultPK in rawRec['results']:
                 try:
                     resultPK = repo.db.asPK(rawResultPK)
@@ -353,7 +352,7 @@ def repairSamples():
                 except KeyError:
                     pass
             keyIsGood = []
-            print(keyExists)
+
             for resultPK in keyExists:
                 try:
                     res = repo.db.resultTable.get(resultPK)
@@ -361,7 +360,7 @@ def repairSamples():
                         keyIsGood.append(resultPK)
                 except InvalidRecordStateError:
                     pass
-            print(keyIsGood)
+
             if len(rawRec['results']) == len(keyIsGood):
                 print('No change for sample {}'.format(rawRec['name']))
                 continue

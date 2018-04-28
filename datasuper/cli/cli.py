@@ -416,6 +416,17 @@ def removeResults(result_names):
             result.remove()
 
 
+@remove.command(name='results-by-type')
+@click.argument('result_types', nargs=-1)
+def removeResults(result_types):
+    '''Remove the given results.'''
+    to_remove = {rtype for rtype in result_types}
+    with Repo.loadRepo() as repo:
+        for result in repo.db.resultTable.getMany(result_names):
+            if result.resultType() in to_remove:
+                result.remove()
+
+
 @remove.command(name='files')
 @click.argument('file_names', nargs=-1)
 def removeFiles(file_names):

@@ -283,6 +283,7 @@ def renameSample(old_name, new_name):
     """Change the human readable name of a sample."""
     with Repo.loadRepo() as repo:
         sample = repo.db.sampleTable.get(old_name)
+        print(f'{old_name} -> {new_name}', file=sys.stderr)
         sample.rename(new_name)
         sample.save(modify=True)
 

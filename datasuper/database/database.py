@@ -135,7 +135,7 @@ class Database:
 
     def flush(self):
         """Write data to disk."""
-        self.tdb.flush()
+        self.tdb._storage.flush()
 
     def close(self):
         '''Close the database.'''

@@ -268,6 +268,24 @@ def viewResultSchema():
             sout += ' '.join(schema)
         print(sout)
 
+###############################################################################
+
+
+@main.group()
+def rename():
+    pass
+
+
+@rename.command(name='sample')
+@click.argument('old_name')
+@click.argument('new_name')
+def renameSample(old_name, new_name):
+    """Change the human readable name of a sample."""
+    with Repo.loadRepo() as repo:
+        sample = repo.db.sampleTable.get(old_name)
+        sample.rename(new_name)
+        sample.save(modify=True)
+
 
 ###############################################################################
 

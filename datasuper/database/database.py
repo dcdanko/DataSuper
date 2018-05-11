@@ -133,6 +133,10 @@ class Database:
         elif recType == SampleGroupRecord:
             return self.sampleGroupTable
 
+    def flush(self):
+        """Write data to disk."""
+        self.tdb.flush()
+
     def close(self):
         '''Close the database.'''
         self.tdb.close()

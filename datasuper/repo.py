@@ -65,6 +65,10 @@ class Repo:
             self.repoMeta['repo_id'] = repoid
             return self.repoMeta['repo_id']
 
+    def flush(self):
+        """Flush new data to disk."""
+        self.db.flush()
+
     def close(self):
         '''Close the repo to further write operations.'''
         self.db.close()
@@ -197,6 +201,7 @@ class Repo:
         if Repo.repoDirName in os.listdir(startPath):
             repoPath = os.path.join(startPath, Repo.repoDirName)
             return Repo(repoPath)
+
         up = os.path.dirname(startPath)
         if up == startPath:
             raise NoRepoFoundError()
@@ -229,4 +234,4 @@ class Repo:
 
     def __exit__(self, *args):
         '''Close the repo.'''
-        self.close()
+        self.flush()

@@ -26,13 +26,13 @@ class DatabaseTable:
         if self.repo.readOnly:
             raise RepoReadOnlyError()
         rawRec = self.getRaw(primaryKey)
-        oldName = rawRec.name
-        rawRec.name = newName
+        oldName = rawRec['name']
+        rawRec['name'] = newName
         self.tbl.update(rawRec, eids=[rawRec.eid])
 
         del self.db.nameToPKTable[oldName]
         self.db.nameToPKTable[newName] = primaryKey
-        self.db.pkToNameTable[priamryKey] = newName
+        self.db.pkToNameTable[primaryKey] = newName
 
         return self.get(primaryKey)
 

@@ -235,3 +235,5 @@ class Repo:
     def __exit__(self, *args):
         '''Close the repo.'''
         self.flush()
+        self.readOnly = True
+

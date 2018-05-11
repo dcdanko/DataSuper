@@ -23,7 +23,7 @@ class DatabaseTable:
 
     def rename(self, primaryKey, newName):
         '''Change name of `primaryKey` to `newName` then return the record.'''
-        if self.readOnly:
+        if self.repo.readOnly:
             raise RepoReadOnlyError()
         rawRec = self.getRaw(primaryKey)
         oldName = rawRec.name

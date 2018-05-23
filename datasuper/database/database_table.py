@@ -12,6 +12,10 @@ class DatabaseTable:
         self.db = db
         self.tbl = tinydbTbl
         self.typeStored = typeStored
+        self.pk_raw_index = None
+        self.pk_index = None
+        self.cached_raw = None
+        self.cached_recs = None
 
     def _newPrimaryKey(self):
         '''Return a new random string for use as a primary key.'''
@@ -42,20 +46,35 @@ class DatabaseTable:
             primaryKey = self.db.asPK(primaryKey)
         except KeyError:
             return False
-        rec = self.tbl.get(where('primary_key') == primaryKey)
-        return rec is not None
+        if not self.pk_index:
+            self._build_pk_index()
+        return primaryKey in self.pk_index
+
+    def _build_pk_index(self):
+        self.pk_raw_index = {
+            raw_rec['primary_key']: ind
+            for raw_rec in self.getAllRaw()
+        }
+        self.pk_index = {
+            raw_rec.primaryKey: ind
+            for raw_rec in self.getAll()
+        }
 
     def getRaw(self, primaryKey):
         '''Return the dict backing `primaryKey`'''
+        if not self.pk_index:
+            self._build_pk_index()
         primaryKey = self.db.asPK(primaryKey)
-        return self.tbl.get(where('primary_key') == primaryKey)
+        ind = self.pk_raw_index[primaryKey]
+        return self.getAllRaw()[ind]
 
     def get(self, primaryKey):
         '''Return the record corresponding to `primaryKey`'''
+        if not self.pk_index:
+            self._build_pk_index()
         primaryKey = self.db.asPK(primaryKey)
-        rawRec = self.tbl.get(where('primary_key') == primaryKey)
-        rec = self.typeStored(self.repo, **rawRec)
-        return rec
+        ind = self.pk_index[primaryKey]
+        return self.getAll()[ind]
 
     def getMany(self, primaryKeys):
         '''Return a list of records corresponding to `priamryKeys`.'''
@@ -65,22 +84,26 @@ class DatabaseTable:
 
     def size(self):
         '''Return the number of records in the table.'''
-        return len(self.tbl.all())
+        return len(self.getAllRaw())
 
     def getAll(self):
         '''Return a list of all records in the table.'''
-        rawRecs = self.tbl.all()
-        recs = [self.typeStored(self.repo, **rawRec) for rawRec in rawRecs]
-        return recs
+        if self.cached_recs:
+            return self.cached_recs
+        rawRecs = self.getAllRaw()
+        self.cached_recs = [self.typeStored(self.repo, **rawRec) for rawRec in rawRecs]
+        return self.cached_recs
 
     def getAllRaw(self):
         '''Return a list of all raw records in the table.'''
-        rawRecs = self.tbl.all()
-        return rawRecs
+        if self.cached_raw:
+            return self.cached_raw
+        self.cached_raw = self.tbl.all()
+        return self.cached_raw
 
     def getAllLazily(self):
         '''Return a generator of tuples of name and a record loader.'''
-        rawRecs = self.tbl.all()
+        rawRecs = self.getAllRaw()
         recs = ((rawRec['name'], lambda: self.typeStored(self.repo, **rawRec))
                 for rawRec in rawRecs)
         return recs
@@ -98,6 +121,17 @@ class DatabaseTable:
             raise RecordExistsError(newRecord)
 
         self.tbl.insert(newRecord)
+        if self.cached_raw:
+            self.cached_raw.append(newRecord)
+            if self.pk_raw_index:
+                self.pk_raw_index[newRecord['primary_key']] = len(self.cached_raw) - 1
+
+        if self.cached_recs:
+            newRec = self.typeStored(self.repo, **newRecord)
+            self.cached_recs.append(newRec)
+            if self.pk_index:
+                self.pk_index[newRec.primaryKey] = len(self.cached_recs) - 1
+
         self.db.nameToPKTable[newRecord['name']] = newRecord['primary_key']
         self.db.pkToNameTable[newRecord['primary_key']] = newRecord['name']
 
@@ -119,12 +153,23 @@ class DatabaseTable:
         if self.repo.readOnly:
             raise RepoReadOnlyError
 
+        if not self.pk_index:
+            self._build_pk_index()
+
         self.tbl.remove(where('primary_key') == primaryKey)
+
+        rec_ind = self.pk_index[primaryKey]
+        del self.cached_recs[rec_ind]
+        raw_ind = self.pk_raw_index[primaryKey]
+        del self.cached_raw[raw_ind]
+
+        self.pk_index = None
+        self.pk_raw_index = None
 
     def getInvalids(self):
         '''Return a list of primary keys for records that cannot be built.'''
         out = []
-        for rawRec in self.tbl.all():
+        for rawRec in self.getAllRaw():
             try:
                 rec = self.typeStored(self.repo, **rawRec)
                 if not rec.validStatus():
@@ -141,7 +186,7 @@ class DatabaseTable:
         if self.repo.readOnly:
             raise RepoReadOnlyError
         toRemove = []
-        for rawRec in self.tbl.all():
+        for rawRec in self.getAllRaw():
             try:
                 rec = self.typeStored(self.repo, **rawRec)
                 if not rec.validStatus():

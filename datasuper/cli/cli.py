@@ -33,10 +33,10 @@ def tableStatus(tbl, tblName):
     ngrps = tbl.size()
     sys.stdout.write('\n{} {}... '.format(ngrps, tblName))
     allGood = True
-    for name, status in tbl.checkStatus().items():
+    for name, (status, msg) in tbl.checkStatus().items():
         if not status:
             allGood = False
-            sys.stdout.write('\n - {} failed'.format(name))
+            sys.stdout.write(f'\n{name} failed: {msg}')
     if allGood:
         sys.stdout.write('all good.')
 

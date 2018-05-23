@@ -206,10 +206,8 @@ class DatabaseTable:
             try:
                 rec = recfunc()
             except InvalidRecordStateError:
-                out[name] = False
+                out[name] = (False, 'could_not_instantiate_record')
                 continue
-            if not rec.validStatus():
-                out[name] = False
-            else:
-                out[name] = True
+            out[name] = rec.detailedStatus()
+
         return out

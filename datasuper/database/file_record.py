@@ -48,6 +48,7 @@ class FileRecord(BaseRecord):
         return self._detailedStatus()[0]
 
     def _detailedStatus(self):
+        '''
         msg = 'all_good'
         if self.cachedValid is None:
             try:
@@ -59,6 +60,10 @@ class FileRecord(BaseRecord):
                 self.cachedValid = False
                 self.cachedMsg = 'file_not_found' + ':' + self.filepath()
         return self.cachedValid, self.cachedMsg
+        '''
+        if not path.isfile(self.filepath()):
+            return False, 'file_not_found' + ':' + self.filepath()
+        return True, 'all_good'
 
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.filepath())

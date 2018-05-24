@@ -33,6 +33,29 @@ def groupFastqs(fastqs, forwardSuffix, reverseSuffix):
     return grouped
 
 
+@bio.command(name='add-single-fastqs')
+@click.option('-U', '--suffix', default='.fastq.gz')
+@click.option('-n', '--name-prefix', default='')
+@click.argument('sample_type')
+@click.argument('fastqs', nargs=-1)
+def addSingleFastqs(suffix, name_prefix, sample_type, fastqs):
+    with Repo.loadRepo() as repo:
+        for fq in fastqs:
+            root = fq.split('/')[-1].split(suffix)[0]
+            print('{}: {}, {}'.format(root, fq))
+            fname = name_prefix + root
+            frec = getOrMakeFile(repo, fname, fq, 'gz_fastq')
+            res = getOrMakeResult(repo,
+                                  name_prefix + root + '_rsrds',
+                                  'raw_short_read_dna_single',
+                                  {'reads': frec})
+            sample = getOrMakeSample(repo,
+                                     name_prefix + root,
+                                     sample_type)
+            sample.addResult(res)
+            sample.save(modify=True)
+
+
 @bio.command(name='add-fastqs')
 @click.option('-1', '--forward-suffix', default='_1.fastq.gz')
 @click.option('-2', '--reverse-suffix', default='_2.fastq.gz')

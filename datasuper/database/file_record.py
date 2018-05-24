@@ -61,9 +61,15 @@ class FileRecord(BaseRecord):
                 self.cachedMsg = 'file_not_found' + ':' + self.filepath()
         return self.cachedValid, self.cachedMsg
         '''
+        if self.cachedValid is not None:
+            return self.cachedValid, self.cachedMsg
         if not path.isfile(self.filepath()):
-            return False, 'file_not_found' + ':' + self.filepath()
-        return True, 'all_good'
+            self.cachedValid = False
+            self.cachedMsg = 'file_not_found' + ':' + self.filepath()
+        else:
+            self.cachedValid = True
+            self.cachedMsg = 'all_good'
+        return self._detailedStatus()
 
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.filepath())

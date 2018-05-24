@@ -116,6 +116,7 @@ class BaseRecord:
         try:
             return self._detailedStatus()
         except Exception:
+            raise
             return False, 'error_calling_detailed_status'
 
     def _detailedStatus(self):

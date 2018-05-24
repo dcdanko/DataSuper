@@ -1,5 +1,7 @@
 from .base_record import *
 import hashlib
+from os import rename, path
+
 
 class FileRecord(BaseRecord):
     '''Class that keeps track of an actual file.'''
@@ -23,6 +25,12 @@ class FileRecord(BaseRecord):
         out['checksum'] = self.checksum
         out['file_type'] = self.fileType
         return out
+
+    def move(self, new_path):
+        '''Move the file to the new path, provided the new paht in unoccupied.'''
+        abs_new_path = path.abspath(new_path)
+        if not path.isfile(abs_new_path):
+            rename(self.filepath(), abs_new_path)
 
     def filepath(self):
         '''Return the abspath of the actual file.'''

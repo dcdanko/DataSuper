@@ -53,11 +53,11 @@ class DatabaseTable:
     def _build_pk_index(self):
         self.pk_raw_index = {
             raw_rec['primary_key']: ind
-            for raw_rec in self.getAllRaw()
+            for ind, raw_rec in enumerate(self.getAllRaw())
         }
         self.pk_index = {
             raw_rec.primaryKey: ind
-            for raw_rec in self.getAll()
+            for ind, raw_rec in enumerate(self.getAll())
         }
 
     def getRaw(self, primaryKey):

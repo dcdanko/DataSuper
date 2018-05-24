@@ -154,5 +154,7 @@ class Database:
     def loadDatabase(repo, path, readOnly):
         '''Load the database from a repo directory.'''
         dbPath = os.path.join(repo.abspath, Database.dbName)
-        tinydbDB = TinyDB(dbPath, storage=CachingMiddleware(JSONStorage))
+        storage = CachingMiddleware(JSONStorage)
+        storage.WRITE_CACHE_SIZE = 100 * 1000
+        tinydbDB = TinyDB(dbPath, storage=storage)
         return Database(repo, readOnly, tinydbDB)

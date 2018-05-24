@@ -15,6 +15,7 @@ class FileRecord(BaseRecord):
             self.checksum = kwargs['checksum']
         except KeyError:
             self.checksum = self._currentChecksum()
+        self.cached_current_checksum = None
         self.cachedValid = None
         self.cachedMsg = None
 
@@ -27,7 +28,7 @@ class FileRecord(BaseRecord):
         return out
 
     def move(self, new_path):
-        '''Move the file to the new path, provided the new paht in unoccupied.'''
+        '''Move the file to the new path, provided the new path is unoccupied.'''
         abs_new_path = path.abspath(new_path)
         if not path.isfile(abs_new_path):
             rename(self.filepath(), abs_new_path)
@@ -37,8 +38,11 @@ class FileRecord(BaseRecord):
         return self.repo.toAbspath(self._filepath)
 
     def _currentChecksum(self):
+        if self.cached_current_checksum:
+            return self.cached_current_checksum
         bits = open(self.filepath(), 'rb').read(4096)
-        return hashlib.sha256(bits).hexdigest()
+        self.cached_current_checksum = hashlib.sha256(bits).hexdigest()
+        return self.cached_current_checksum
 
     def _validStatus(self):
         return self._detailedStatus()[0]

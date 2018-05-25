@@ -11,11 +11,11 @@ class FileRecord(BaseRecord):
 
         self._filepath = self.repo.pathFromRepo(kwargs['filepath'])
         self.fileType = self.repo.validateFileType(kwargs['file_type'])
+        self.cached_current_checksum = None
         try:
             self.checksum = kwargs['checksum']
         except KeyError:
             self.checksum = self._currentChecksum()
-        self.cached_current_checksum = None
         self.cachedValid = None
         self.cachedMsg = None
 

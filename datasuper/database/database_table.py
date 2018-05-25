@@ -144,7 +144,7 @@ class DatabaseTable:
             raise RepoReadOnlyError
         rawRec = self.getRaw(primaryKey)
         assert rawRec['name'] == updatedRecord['name']
-        self.tbl.update(updatedRecord, eids=[rawRec.eid])
+        self.tbl.update(updatedRecord, where('primary_key') == primaryKey)
         return self.get(primaryKey)
 
     def remove(self, primaryKey):

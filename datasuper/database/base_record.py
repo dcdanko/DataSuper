@@ -28,6 +28,7 @@ class BaseRecord:
             self.metadata = kwargs['metadata']
         except KeyError:
             self.metadata = {}
+        self.cachedStatus = None
 
     def exists(self):
         '''Return True if this record has been saved at some point.'''
@@ -113,8 +114,11 @@ class BaseRecord:
         raise NotImplementedError()
 
     def detailedStatus(self):
+        if self.cachedStatus is not None:
+            return self.cachedStatus
         try:
-            return self._detailedStatus()
+            self.cachedStatus = self._detailedStatus()
+            return self.cachedStatus
         except Exception:
             raise
             return False, 'error_calling_detailed_status'

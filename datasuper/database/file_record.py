@@ -69,7 +69,7 @@ class FileRecord(BaseRecord):
         else:
             self.cachedValid = True
             self.cachedMsg = 'all_good'
-        return self._detailedStatus()
+        return self.cachedValid, self.cachedMsg
 
     def __str__(self):
         out = '{}\t{}'.format(self.name, self.filepath())

@@ -303,7 +303,7 @@ def renameSample(old_name, new_name):
         sample.save(modify=True)
 
     for old_path in old_file_paths:
-        sys.stdout.write(old_path)
+        print(old_path)
 
 
 ###############################################################################

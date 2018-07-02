@@ -292,7 +292,7 @@ def renameSample(old_name, new_name):
         for result in sample.results():
             new_result_name = switch(result.name)
             result.rename(new_result_name)
-            for filerec in result.files():
+            for _, filerec in result.files():
                 new_file_name = switch(filerec.name)
                 filerec.rename(new_file_name)
                 old_file_paths.append(filerec.filepath())

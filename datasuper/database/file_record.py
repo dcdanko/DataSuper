@@ -91,8 +91,8 @@ class FileRecord(BaseRecord):
         """
         new_path = self.repo.toAbspath(new_path)
         if path.isfile(new_path):
-            raise FileExistsError()
-        makedirs(path.dirname(new_path))
+            raise FileExistsError(new_path)
+        makedirs(path.dirname(new_path), exist_ok=True)
         copy2(self.filepath(), new_path)  # preserves file metadata
         self._filepath = new_path
         return self

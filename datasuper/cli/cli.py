@@ -281,11 +281,29 @@ def rename():
 @click.argument('new_name')
 def renameSample(old_name, new_name):
     """Change the human readable name of a sample."""
+    def switch(val):
+        return new_name.join(val.split(old_name))
+
     with Repo.loadRepo() as repo:
         sample = repo.db.sampleTable.get(old_name)
         print(f'{old_name} -> {new_name}', file=sys.stderr)
         sample.rename(new_name)
+        old_file_paths = []
+        for result in sample.results():
+            new_result_name = switch(result.name)
+            result.rename(new_result_name)
+            for filerec in result.files():
+                new_file_name = switch(filerec.name)
+                filerec.rename(new_file_name)
+                old_file_paths.append(filerec.filepath())
+                new_file_path = switch(filerec.filepath())
+                filerec.copy(new_file_path)
+                filerec.save(modify=True)
+            result.save(modify=True)
         sample.save(modify=True)
+
+    for old_path in old_file_paths:
+        sys.stdout.write(old_path)
 
 
 ###############################################################################

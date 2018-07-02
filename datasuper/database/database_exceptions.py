@@ -1,4 +1,9 @@
 
+
+class FileExistsError(Exception):
+    pass
+
+
 class RecordExistsError(Exception):
     pass
 

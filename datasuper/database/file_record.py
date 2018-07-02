@@ -1,6 +1,7 @@
 from .base_record import *
 import hashlib
-from os import rename, path
+from os import rename, path, makedirs
+from shutil import copy2
 
 
 class FileRecord(BaseRecord):
@@ -80,3 +81,18 @@ class FileRecord(BaseRecord):
         if not atomic:
             raise NotImplementedError()
         self.atomicDelete()
+
+    def copy(self, new_path):
+        """Copy the file to new_path provided new_path does not exist.
+
+        Set internal filepath to point at the new path.
+
+        Make any intermediate dirs.
+        """
+        new_path = self.repo.toAbspath(new_path)
+        if path.isfile(new_path):
+            raise FileExistsError()
+        makedirs(path.dirname(new_path))
+        copy2(self.filepath(), new_path)  # preserves file metadata
+        self._filepath = new_path
+        return self

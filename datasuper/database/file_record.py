@@ -89,6 +89,8 @@ class FileRecord(BaseRecord):
 
         Make any intermediate dirs.
         """
+        if not path.isfile(self.filepath()):
+            return
         new_path = self.repo.toAbspath(new_path)
         if path.isfile(new_path):
             raise FileExistsError(new_path)

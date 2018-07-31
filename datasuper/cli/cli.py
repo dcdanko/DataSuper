@@ -409,9 +409,10 @@ def repairSamples():
                     print('Fixed sample {}'.format(samp.name))
                 except InvalidRecordStateError:
                     print('Failed to save sample {}'.format(rawRec['name']))
+                    raise
             except InvalidRecordStateError:
                 print('Failed to fix sample {}'.format(rawRec['name']))
-
+                raise
 
 ###############################################################################
 
@@ -454,12 +455,12 @@ def removeResults(result_names):
 
 @remove.command(name='results-by-type')
 @click.argument('result_types', nargs=-1)
-def removeResults(result_types):
+def removeResultsOfType(result_types):
     '''Remove the given results.'''
-    to_remove = {rtype for rtype in result_types}
+    result_types = set(result_types)
     with Repo.loadRepo() as repo:
-        for result in repo.db.resultTable.getMany(result_names):
-            if result.resultType() in to_remove:
+        for result in repo.db.resultTable.getAll():
+            if result.resultType() in result_types:
                 result.remove()
 
 

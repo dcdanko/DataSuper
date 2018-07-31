@@ -42,8 +42,8 @@ def addSingleFastqs(suffix, name_prefix, sample_type, fastqs):
     with Repo.loadRepo() as repo:
         for fq in fastqs:
             root = fq.split('/')[-1].split(suffix)[0]
-            print('{}: {}, {}'.format(root, fq))
-            fname = name_prefix + root
+            print('{}: {}'.format(root, fq))
+            fname = name_prefix + root + '_single'
             frec = getOrMakeFile(repo, fname, fq, 'gz_fastq')
             res = getOrMakeResult(repo,
                                   name_prefix + root + '_rsrds',

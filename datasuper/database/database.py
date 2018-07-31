@@ -49,21 +49,16 @@ class Database:
         self.pkToNameTable = {}
         self.nameToPKTable = {}
 
-        for rec in self.fileTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        def handleTable(tbl):
+            for rec in tbl.getAllRaw():
+                rec_pk, rec_name = rec['primary_key'], rec['name']
+                self.pkToNameTable[rec_pk] = rec_name
+                self.nameToPKTable[rec_name] = rec_pk
 
-        for rec in self.resultTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
-
-        for rec in self.sampleTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
-
-        for rec in self.sampleGroupTable.getAll():
-            self.pkToNameTable[rec.primaryKey] = rec.name
-            self.nameToPKTable[rec.name] = rec.primaryKey
+        handleTable(self.fileTable)
+        handleTable(self.resultTable)
+        handleTable(self.sampleTable)
+        handleTable(self.sampleGroupTable)
 
     def pkNotUsed(self, primaryKey):
         '''Return True if `primaryKey` has not been used, else False.'''

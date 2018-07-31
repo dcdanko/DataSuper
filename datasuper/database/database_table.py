@@ -55,10 +55,13 @@ class DatabaseTable:
             raw_rec['primary_key']: ind
             for ind, raw_rec in enumerate(self.getAllRaw())
         }
+        self.pk_index = self.pk_raw_index
+        '''
         self.pk_index = {
             raw_rec.primaryKey: ind
             for ind, raw_rec in enumerate(self.getAll())
         }
+        '''
 
     def getRaw(self, primaryKey):
         '''Return the dict backing `primaryKey`'''
@@ -73,8 +76,9 @@ class DatabaseTable:
         if not self.pk_index:
             self._build_pk_index()
         primaryKey = self.db.asPK(primaryKey)
-        ind = self.pk_index[primaryKey]
-        return self.getAll()[ind]
+        ind = self.pk_raw_index[primaryKey]
+        rawRec = self.getAllRaw()[ind]
+        return self.typeStored(self.repo, **rawRec)
 
     def getMany(self, primaryKeys):
         '''Return a list of records corresponding to `priamryKeys`.'''

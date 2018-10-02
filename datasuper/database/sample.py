@@ -30,7 +30,11 @@ class SampleRecord(BaseRecord):
         return self.detailedStatus()[0]
 
     def _detailedStatus(self):
-        for res in self.results():
+        try:
+            results = self.results()
+        except KeyError:
+            return False, 'one_or_more_results_is_missing'
+        for res in results:
             if type(res) != ResultRecord:
                 return False, 'result_is_not_actually_a_result'
             resStatus, resStatusMsg = res.detailedStatus()

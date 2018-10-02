@@ -162,11 +162,14 @@ class DatabaseTable:
 
         self.tbl.remove(where('primary_key') == primaryKey)
 
-        rec_ind = self.pk_index[primaryKey]
-        del self.cached_recs[rec_ind]
-        raw_ind = self.pk_raw_index[primaryKey]
-        del self.cached_raw[raw_ind]
-
+        try:
+            rec_ind = self.pk_index[primaryKey]
+            del self.cached_recs[rec_ind]
+            raw_ind = self.pk_raw_index[primaryKey]
+            del self.cached_raw[raw_ind]
+        except TypeError:
+            pass
+        
         self.pk_index = None
         self.pk_raw_index = None
 
@@ -209,9 +212,11 @@ class DatabaseTable:
         for name, recfunc in self.getAllLazily():
             try:
                 rec = recfunc()
-            except InvalidRecordStateError:
-                out[name] = (False, 'could_not_instantiate_record')
+            except InvalidRecordStateError as irse:
+                out[name] = (False, 'could_not_instantiate_record:' + str(irse))
                 continue
-            out[name] = rec.detailedStatus()
-
+            try:
+                out[name] = rec.detailedStatus()
+            except InvalidRecordStateError as irse:
+                out[name] = (False, 'could_not_check_status:' + str(irse))
         return out

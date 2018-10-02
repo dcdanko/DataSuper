@@ -26,7 +26,7 @@ class ResultRecord(BaseRecord):
             except AttributeError:
                 fileRecs = [self.db.asPK(el) for el in fileRecs]
         except KeyError:
-            raise
+            raise InvalidRecordStateError('missing_one_or_more_files')
 
         # this will return a list of primary keys or a
         # map of identifiers -> primary keys (as a dict)

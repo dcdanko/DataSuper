@@ -6,7 +6,11 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
-from datasuper.version import __version__
+
+version = {}
+VERSION_PATH = os.path.dirname(os.path.realpath(__file__))
+with open('{0}/datasuper/version.py'.format(VERSION_PATH)) as fp:
+    exec(fp.read(), version)
 
 
 dependencies = [
@@ -33,15 +37,15 @@ class VerifyVersionCommand(install):
     def run(self):
         tag = os.getenv('CIRCLE_TAG')
 
-        if tag != 'v{0}'.format(__version__):
+        if tag != 'v{0}'.format(version['__version__']):
             info = 'Git tag: {0} does not match the version of this app: {1}'
-            info = info.format(tag, __version__)
+            info = info.format(tag, version['__version__'])
             sys.exit(info)
 
 
 setup(
     name="DataSuper",
-    version=__version__,
+    version=version['__version__'],
     url="https://github.com/dcdanko/DataSuper",
 
     author="David C. Danko",

@@ -14,12 +14,12 @@ with open('{0}/datasuper/version.py'.format(VERSION_PATH)) as fp:
 
 
 dependencies = [
-    'click==6.7',
-    'py-archy==1.0.1',
-    'PyYAML==3.12',
-    'tinydb==3.5.0',
-    'ujson==1.35',
-    'yaml_backed_structs==0.9.0',
+    'click~=6.7',
+    'py-archy~=1.0.1',
+    'PyYAML~=3.12',
+    'tinydb~=3.5.0',
+    'ujson~=1.35',
+    'yaml_backed_structs~=0.9.0',
 ]
 
 

@@ -1,9 +1,21 @@
 DataSuper
 =========
 
+.. image:: https://img.shields.io/circleci/project/github/dcdanko/DataSuper/master.svg
+    :alt: CircleCI master
+
 .. image:: https://img.shields.io/pypi/v/DataSuper.svg
     :target: https://pypi.python.org/pypi/DataSuper
     :alt: Latest PyPI version
+
+.. image:: https://img.shields.io/pypi/pyversions/DataSuper.svg
+    :alt: PyPI - Python version
+
+.. image:: https://img.shields.io/pypi/dm/DataSuper.svg
+    :alt: PyPI - Downloads
+
+.. image:: https://img.shields.io/github/license/dcdanko/DataSuper.svg
+    :alt: Github license
 
 Easy to use pipelines for large biological datasets.
 

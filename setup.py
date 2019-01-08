@@ -19,7 +19,7 @@ dependencies = [
     'PyYAML~=3.12',
     'tinydb~=3.5.0',
     'ujson~=1.35',
-    'yaml_backed_structs~=0.9.0',
+    'yaml_backed_structs~=1.0.0',
 ]
 
 

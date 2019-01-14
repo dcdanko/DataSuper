@@ -71,7 +71,7 @@ class ResultRecord(BaseRecord):
         try:
             for key in self._resultSchema.keys():
                 if key not in self._fileRecords:
-                    return False, f'missing_schema_position:{key}'
+                    return False, 'missing_schema_position:' + key
         except AttributeError:
             diff = len(self._resultSchema) - len(self._fileRecords)
             if diff != 0:

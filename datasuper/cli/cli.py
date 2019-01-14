@@ -4,8 +4,11 @@ from datasuper.database import *
 import sys
 from json import dumps as jdumps
 
+from ..version import __version__
+
 
 @click.group()
+@click.version_option(__version__)
 def main():
     pass
 

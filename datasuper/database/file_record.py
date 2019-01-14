@@ -1,4 +1,4 @@
-from .base_record import *
+from .base_record import BaseRecord
 import hashlib
 from os import rename, path, makedirs
 from shutil import copy2

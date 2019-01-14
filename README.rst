@@ -8,6 +8,10 @@ DataSuper
     :target: https://pypi.python.org/pypi/DataSuper
     :alt: Latest PyPI version
 
+.. image:: https://www.codefactor.io/repository/github/dcdanko/DataSuper/badge
+    :target: https://www.codefactor.io/repository/github/dcdanko/DataSuper
+    :alt: CodeFactor
+
 .. image:: https://img.shields.io/pypi/pyversions/DataSuper.svg
     :alt: PyPI - Python version
 
@@ -16,6 +20,7 @@ DataSuper
 
 .. image:: https://img.shields.io/github/license/dcdanko/DataSuper.svg
     :alt: Github license
+
 
 Easy to use pipelines for large biological datasets.
 

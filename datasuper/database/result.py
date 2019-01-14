@@ -1,6 +1,9 @@
-from .base_record import *
+from .base_record import BaseRecord
 from pyarchy import archy
-from .database_exceptions import SchemaMismatchError
+from .database_exceptions import (
+    SchemaMismatchError,
+    InvalidRecordStateError,
+)
 
 
 class ResultRecord(BaseRecord):
@@ -18,6 +21,7 @@ class ResultRecord(BaseRecord):
         except KeyError:
             self._provenance = []
         self._resultType = self.repo.validateResultType(kwargs['result_type'])
+        self._resultSchema = self.repo.getResultSchema(self._resultType)
 
         try:
             fileRecs = kwargs['file_records']
@@ -43,7 +47,7 @@ class ResultRecord(BaseRecord):
 
     def files(self):
         '''Return a list of tuples of (key, file-record).'''
-        if type(self._fileRecords) == dict:
+        if isinstance(self._fileRecords, dict):
             out = {}
             for k, fr in self._fileRecords.items():
                 out[k] = self.db.fileTable.get(fr)
@@ -57,8 +61,6 @@ class ResultRecord(BaseRecord):
 
     def _detailedStatus(self):
         fs = self.files()
-        if len(fs) == 0:
-            return True, 'all_good'
         if len(fs[0]) == 2:
             fs = [el[1] for el in fs]
         for fileRec in fs:
@@ -66,7 +68,14 @@ class ResultRecord(BaseRecord):
             if not fileRecStatus:
                 return False, 'bad_file_status' + ':' + fileRecStatusMsg
 
-        # TODO: check that it matches schema
+        try:
+            for key in self._resultSchema.keys():
+                if key not in self._fileRecords:
+                    return False, 'missing_schema_position:' + key
+        except AttributeError:
+            diff = len(self._resultSchema) - len(self._fileRecords)
+            if diff != 0:
+                return False, 'wrong_number_of_files:' + str(diff)
         return True, 'all_good'
 
     def resultType(self):
@@ -75,16 +84,16 @@ class ResultRecord(BaseRecord):
 
     def instantiateResultSchema(self, fileRecs, aggressive=False):
         schema = self.repo.getResultSchema(self.resultType())
-        if type(schema) == list:
+        if isinstance(schema, list):
             if fileRecs is None:
                 return [None for _ in schema]
-            elif len(fileRecs) != len(schema):
+            if len(fileRecs) != len(schema):
                 SchemaMismatchError.raise_with_message(self.resultType(),
                                                        self.primaryKey,
                                                        schema,
                                                        fileRecs)
             return fileRecs
-        elif type(schema) == dict:
+        elif isinstance(schema. dict):
             if fileRecs is None:
                 return {k: None for k in schema.keys()}
             else:
@@ -113,8 +122,7 @@ class ResultRecord(BaseRecord):
             out['nodes'].append('{} {}'.format(key, str(fr)))
         if raw:
             return out
-        else:
-            return archy(out)
+        return archy(out)
 
     def remove(self, atomic=False):
         '''Remove this result.

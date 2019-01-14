@@ -45,7 +45,9 @@ class VerifyVersionCommand(install):
 
 setup(
     name="DataSuper",
+
     version=version['__version__'],
+
     url="https://github.com/dcdanko/DataSuper",
 
     author="David C. Danko",

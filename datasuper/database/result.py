@@ -75,7 +75,7 @@ class ResultRecord(BaseRecord):
         except AttributeError:
             diff = len(self._resultSchema) - len(self._fileRecords)
             if diff != 0:
-                return False, f'wrong_number_of_files:{diff}'
+                return False, 'wrong_number_of_files:' + str(diff)
         return True, 'all_good'
 
     def resultType(self):

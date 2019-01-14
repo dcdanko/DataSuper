@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="DataSuper",
-    version="0.9.0",
+    version="0.9.2",
     url="https://github.com/dcdanko/DataSuper",
 
     author="David C. Danko",

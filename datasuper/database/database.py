@@ -2,11 +2,11 @@ from tinydb import TinyDB
 from tinydb.storages import JSONStorage
 from tinydb.middlewares import CachingMiddleware
 import os
-from .database_table import *
-from .file_record import *
-from .result import *
-from .sample_group import *
-from .sample import *
+from .database_table import DatabaseTable
+from .file_record import FileRecord
+from .result import ResultRecord
+from .sample_group import SampleGroupRecord
+from .sample import SampleRecord
 
 
 class Database:
@@ -41,7 +41,7 @@ class Database:
         self.sampleGroupTable = DatabaseTable(self,
                                               self.readOnly,
                                               SampleGroupRecord,
-                                              self.tdb.table( Database.sampleGroupTblName))
+                                              self.tdb.table(Database.sampleGroupTblName))
 
     def _buildPKNameTables(self):
         if self.pkToNameTable is not None:
@@ -71,7 +71,7 @@ class Database:
         return not (name in self.nameToPKTable)
 
     def asPK(self, name):
-        '''Return a primary key corresponding to name. 
+        '''Return a primary key corresponding to name.
 
         If `name` is actually a primary key return `name`.
 

@@ -1,7 +1,12 @@
 import os.path
-from yaml_backed_structs import *
-from datasuper.database import *
-from .errors import *
+from yaml_backed_structs import PersistentDict, PersistentSet
+from datasuper.database import Database
+from .errors import (
+    NoRepoFoundError,
+    TypeNotFoundError,
+    RepoReadOnlyError,
+    RepoAlreadyExistsError,
+)
 
 
 class Repo:
@@ -91,7 +96,7 @@ class Repo:
     def addFileType(self, fileType, ext=None):
         '''Add a new fileType to the repo with optional extension.'''
         if self._notReadOnly():
-            if type(fileType) is dict:
+            if isinstance(fileType, dict):
                 assert 'name' in fileType
                 name = fileType['name']
                 try:
@@ -236,4 +241,3 @@ class Repo:
         '''Close the repo.'''
         self.flush()
         self.readOnly = True
-

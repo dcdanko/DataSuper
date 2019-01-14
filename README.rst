@@ -5,6 +5,11 @@ DataSuper
     :target: https://pypi.python.org/pypi/DataSuper
     :alt: Latest PyPI version
 
+
+.. image:: https://www.codefactor.io/repository/github/dcdanko/DataSuper/badge
+    :target: https://www.codefactor.io/repository/github/dcdanko/DataSuper
+    :alt: CodeFactor
+
 Easy to use pipelines for large biological datasets.
 
 Goals

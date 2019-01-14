@@ -1,7 +1,6 @@
-from .base_record import *
-from .sample import *
-from .result import *
-from .file_record import *
+from .base_record import BaseRecord
+from .sample import SampleRecord
+from .result import ResultRecord
 from pyarchy import archy
 
 
@@ -32,19 +31,19 @@ class SampleGroupRecord(BaseRecord):
         for subgroup in self.subgroups():
             if subgroup.primaryKey == self.primaryKey:
                 return False, 'recursive_group'
-            if type(subgroup) != SampleGroupRecord:
+            if not isinstance(subgroup, SampleGroupRecord):
                 return False, 'subgroup_is_not_group'
             subStatus, subStatusMsg = subgroup.detailedStatus()
             if not subStatus:
                 return False, 'bad_subgroup_status' + ':' + subStatusMsg
         for sample in self.directSamples():
-            if type(sample) != SampleRecord:
+            if not isinstance(sample, SampleRecord):
                 return False, 'sample_is_not_sample'
             sampStatus, sampStatusMsg = sample.detailedStatus()
             if not sampStatus:
                 return False, 'bad_sample_status' + ':' + sampStatusMsg
         for result in self.directResults():
-            if type(result) != ResultRecord:
+            if not isinstance(result, ResultRecord):
                 return False, 'result_is_not_result'
             resStatus, resMsg = result.detailedStatus()
             if not resStatus:
@@ -129,19 +128,19 @@ class SampleGroupRecord(BaseRecord):
         resOut = {'label': 'direct_results', 'nodes': []}
         for res in self.directResults():
             resOut['nodes'].append(res.tree(raw=True))
-        if len(resOut['nodes']) > 0:
+        if resOut['nodes']:
             out['nodes'].append(resOut)
 
         sOut = {'label': 'direct_samples', 'nodes': []}
         for sample in self.directSamples():
             sOut['nodes'].append(sample.tree(raw=True))
-        if len(sOut['nodes']) > 0:
+        if sOut['nodes']:
             out['nodes'].append(sOut)
 
         gOut = {'label': 'subgroups', 'nodes': []}
         for subgroup in self.subgroups():
             gOut['nodes'].append(subgroup.tree(raw=True))
-        if len(gOut['nodes']) > 0:
+        if gOut['nodes']:
             out['nodes'].append(gOut)
         if raw:
             return out

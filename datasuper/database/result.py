@@ -93,7 +93,7 @@ class ResultRecord(BaseRecord):
                                                        schema,
                                                        fileRecs)
             return fileRecs
-        elif isinstance(schema. dict):
+        elif isinstance(schema, dict):
             if fileRecs is None:
                 return {k: None for k in schema.keys()}
             else:

@@ -57,16 +57,19 @@ def addSingleFastqs(suffix, name_prefix, sample_type, fastqs):
 
 
 @bio.command(name='add-fastqs')
+@click.option('-d', '--delim', default=None)
 @click.option('-1', '--forward-suffix', default='_1.fastq.gz')
 @click.option('-2', '--reverse-suffix', default='_2.fastq.gz')
 @click.option('-n', '--name-prefix', default='')
 @click.argument('sample_type')
 @click.argument('fastqs', nargs=-1)
-def addFastqs(forward_suffix, reverse_suffix,
+def addFastqs(delim, forward_suffix, reverse_suffix,
               name_prefix, sample_type, fastqs):
     groups = groupFastqs(fastqs, forward_suffix, reverse_suffix)
     with Repo.loadRepo() as repo:
         for root, (fq1, fq2) in groups.items():
+            if delim:
+                root = root.split(delim)[0]
             print('{}: {}, {}'.format(root, fq1, fq2))
             if (fq1 is None) or (fq2 is None):
                 continue

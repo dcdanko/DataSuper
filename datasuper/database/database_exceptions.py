@@ -17,7 +17,6 @@ class RepoReadOnlyError(Exception):
 
 
 class SchemaMismatchError(Exception):
-    pass
 
     @classmethod
     def raise_with_message(cls, resultType, pk, schema, fileRecs):

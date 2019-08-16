@@ -1,6 +1,6 @@
-from .base_record import *
+from .base_record import BaseRecord
 from pyarchy import archy
-from .result import *
+from .result import ResultRecord
 
 
 class SampleRecord(BaseRecord):
@@ -35,7 +35,7 @@ class SampleRecord(BaseRecord):
         except KeyError:
             return False, 'one_or_more_results_is_missing'
         for res in results:
-            if type(res) != ResultRecord:
+            if not isinstance(res, ResultRecord):
                 return False, 'result_is_not_actually_a_result'
             resStatus, resStatusMsg = res.detailedStatus()
             if not resStatus:
@@ -76,11 +76,9 @@ class SampleRecord(BaseRecord):
 
     def tree(self, raw=False):
         '''Returns a JSONable tree starting at this sample.'''
-        out = {'label': self.name, 'nodes':[]}
+        out = {'label': self.name, 'nodes': []}
         for res in self.results():
-            out['nodes'].append( res.tree(raw=True))
+            out['nodes'].append(res.tree(raw=True))
         if raw:
             return out
-        else:
-            return archy(out)
-
+        return archy(out)

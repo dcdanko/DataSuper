@@ -1,26 +1,29 @@
-from tinydb import TinyDB
-from tinydb.storages import JSONStorage
-from tinydb.middlewares import CachingMiddleware
+
+import sqlite3 as sql
 import os
-from .database_table import *
-from .file_record import *
-from .result import *
-from .sample_group import *
-from .sample import *
+
+from .database_table import DatabaseTable
+from .file_record import FileRecord
+from .result import ResultRecord
+from .sample_group import SampleGroupRecord
+from .sample import SampleRecord
 
 
 class Database:
     '''Represents a database that stores tables of records.'''
-    dbName = 'datasuper.tinydb.json'
-    fileTblName = 'file_record_table'
-    resultTblName = 'result_record_table'
-    sampleTblName = 'sample_record_table'
-    sampleGroupTblName = 'sample_group_record_tbl'
+    db_name = 'datasuper.sqlite3.db'
+    file_tbl_name = 'FILES'
+    result_tbl_name = 'RESULTS'
+    sample_tbl_name = 'SAMPLES'
+    sample_group_tbl_name = 'GROUPS'
 
-    def __init__(self, repo, readOnly, tinyDB):
+    def __init__(self, repo, readOnly, connection):
         self.repo = repo
         self.readOnly = readOnly
-        self.tdb = tinyDB
+
+        self.connection = connection
+        self.c = connection
+
         self.pkToNameTable = None
         self.nameToPKTable = None
         self.fileTable = DatabaseTable(self,
@@ -41,7 +44,7 @@ class Database:
         self.sampleGroupTable = DatabaseTable(self,
                                               self.readOnly,
                                               SampleGroupRecord,
-                                              self.tdb.table( Database.sampleGroupTblName))
+                                              self.tdb.table(Database.sampleGroupTblName))
 
     def _buildPKNameTables(self):
         if self.pkToNameTable is not None:
@@ -71,7 +74,7 @@ class Database:
         return not (name in self.nameToPKTable)
 
     def asPK(self, name):
-        '''Return a primary key corresponding to name. 
+        '''Return a primary key corresponding to name.
 
         If `name` is actually a primary key return `name`.
 

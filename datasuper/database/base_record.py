@@ -1,4 +1,7 @@
-from .database_exceptions import *
+from .database_exceptions import (
+    InvalidRecordStateError,
+    RecordExistsError,
+)
 
 
 class BaseRecord:
@@ -74,7 +77,7 @@ class BaseRecord:
     def _mergeDicts(self, rec):
         mydict = self.to_dict()
         for k, v in mydict.items():
-            if k in rec and type(v) == dict and type(rec[k]) == dict:
+            if k in rec and isinstance(v, dict) and isinstance(rec[k], dict):
                 for subk, subv in v.items():
                     rec[k][subk] = subv
             else:
@@ -121,7 +124,6 @@ class BaseRecord:
             return self.cachedStatus
         except Exception:
             raise
-            return False, 'error_calling_detailed_status'
 
     def _detailedStatus(self):
         raise NotImplementedError()

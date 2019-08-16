@@ -1,7 +1,7 @@
-
-import sqlite3 as sql
+from tinydb import TinyDB
+from tinydb.storages import JSONStorage
+from tinydb.middlewares import CachingMiddleware
 import os
-
 from .database_table import DatabaseTable
 from .file_record import FileRecord
 from .result import ResultRecord
@@ -11,19 +11,16 @@ from .sample import SampleRecord
 
 class Database:
     '''Represents a database that stores tables of records.'''
-    db_name = 'datasuper.sqlite3.db'
-    file_tbl_name = 'FILES'
-    result_tbl_name = 'RESULTS'
-    sample_tbl_name = 'SAMPLES'
-    sample_group_tbl_name = 'GROUPS'
+    dbName = 'datasuper.tinydb.json'
+    fileTblName = 'file_record_table'
+    resultTblName = 'result_record_table'
+    sampleTblName = 'sample_record_table'
+    sampleGroupTblName = 'sample_group_record_tbl'
 
-    def __init__(self, repo, readOnly, connection):
+    def __init__(self, repo, readOnly, tinyDB):
         self.repo = repo
         self.readOnly = readOnly
-
-        self.connection = connection
-        self.c = connection
-
+        self.tdb = tinyDB
         self.pkToNameTable = None
         self.nameToPKTable = None
         self.fileTable = DatabaseTable(self,
@@ -75,9 +72,7 @@ class Database:
 
     def asPK(self, name):
         '''Return a primary key corresponding to name.
-
         If `name` is actually a primary key return `name`.
-
         '''
         self._buildPKNameTables()
         try:

@@ -14,8 +14,8 @@ def file_list(sample_names, operands):
         line = f'{sample.name}' if sample_names else ''
         for result_type, file_type in operands:
             for result in sample.results(resultTypes=[result_type]):
-                for file_rec in result.files():
-                    if file_rec.fileType == file_type:
+                for my_file_type, file_rec in result.files():
+                    if my_file_type == file_type:
                         line += f'{file_rec.filepath()}\t'
         print(line)
 

@@ -11,7 +11,7 @@ def file_list(sample_names, operands):
     operands = [tuple(operand.split('.')) for operand in operands]
     repo = Repo.loadRepo()
     for sample in repo.db.sampleTable.getAll():
-        line = f'{sample.name}' if sample_names else ''
+        line = f'{sample.name}\t' if sample_names else ''
         for result_type, file_type in operands:
             for result in sample.results(resultTypes=[result_type]):
                 for my_file_type, file_rec in result.files():

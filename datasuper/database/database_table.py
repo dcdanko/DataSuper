@@ -1,3 +1,4 @@
+
 from tinydb import where
 from random import choice as rchoice
 import string
@@ -12,23 +13,15 @@ from .database_exceptions import (
 class DatabaseTable:
     """Stores and manipulates database records of a given type."""
 
-    def __init__(self, db, readOnly, typeStored, tbl_name):
+    def __init__(self, db, readOnly, typeStored, tinydbTbl):
         self.repo = db.repo
         self.db = db
-        self.tbl_name = tbl_name
+        self.tbl = tinydbTbl
         self.typeStored = typeStored
         self.pk_raw_index = None
         self.pk_index = None
         self.cached_raw = None
         self.cached_recs = None
-
-    def _create_table(self):
-        cmd = f'CREATE TABLE IF NOT EXISTS {self.tbl_name} ('
-        cmd += (
-            'uuid STRING PRIMARY KEY, '
-            'name STRING, '
-            
-        )
 
     def _newPrimaryKey(self):
         """Return a new random string for use as a primary key."""

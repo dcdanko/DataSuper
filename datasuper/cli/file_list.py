@@ -4,7 +4,7 @@ import click
 from datasuper import *
 
 
-@main.group('list')
+@main.command('list')
 @click.option('-s/-n', '--sample-names/--no-sample-names', default=False)
 @click.argument('operands', nargs=-1)
 def file_list(sample_names, operands):
